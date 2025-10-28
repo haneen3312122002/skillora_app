@@ -1,10 +1,12 @@
-import '../../domain/entities/task_entity.dart';
-import '../../domain/repositories/task_rep.dart';
+import 'package:notes_tasks/task/domain/entities/task_entity.dart';
+import 'package:notes_tasks/task/domain/repositories/get_all_tasks_repo.dart';
 
 class GetAllTasksUseCase {
-  final TaskRepo rep;
-  GetAllTasksUseCase({required this.rep});
+  final IGetAllTasksRepo repo;
+
+  GetAllTasksUseCase(this.repo);
+
   Future<List<TaskEntity>> call() async {
-    return await rep.getAllTasks();
+    return await repo.getAllTasks();
   }
 }

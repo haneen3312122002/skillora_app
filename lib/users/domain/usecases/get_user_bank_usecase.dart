@@ -1,8 +1,9 @@
 import 'package:notes_tasks/users/domain/entities/user_entity.dart';
-import 'package:notes_tasks/users/domain/repositories/user_repo.dart';
+import 'package:notes_tasks/users/domain/repositories/get_user_bank_repo.dart';
 
 class GetUserBankUseCase {
-  final UserRepo repo;
+  final IGetUserBankRepo repo;
+
   GetUserBankUseCase(this.repo);
 
   Future<BankEntity> call(int id) async {
