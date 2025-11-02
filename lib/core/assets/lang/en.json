@@ -27,6 +27,7 @@
   "company_name": "Company Name",
   "title": "Title",
   "users_title": " Users",
-  "failed_load_users": "Failed to load users"
+  "failed_load_users": "Failed to load users",
+   "no_cart_found": "No cart found."
 
 }

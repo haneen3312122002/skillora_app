@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:notes_tasks/cart/domain/entities/cart_entity.dart';
@@ -30,7 +31,7 @@ class _FirstCartScreenState extends ConsumerState<FirstCartScreen> {
       body: cartState.when(
         data: (CartEntity? cart) {
           if (cart == null) {
-            return const Center(child: Text('No cart found.'));
+            return Center(child: Text('no_cart_found'.tr()));
           }
 
           return RefreshIndicator(
@@ -68,7 +69,7 @@ class _FirstCartScreenState extends ConsumerState<FirstCartScreen> {
                     .read(getFirstCartViewModelProvider.notifier)
                     .fetchFirstCart(),
                 icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                label: Text('retry'.tr()),
               ),
             ],
           ),
