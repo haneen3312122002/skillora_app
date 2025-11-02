@@ -36,7 +36,6 @@ class AppScaffold extends StatelessWidget {
         : body;
 
     return Scaffold(
-      // ✅ استخدم لون الخلفية من الثيم بدل اللون اليدوي
       backgroundColor: theme.scaffoldBackgroundColor,
 
       appBar: title != null

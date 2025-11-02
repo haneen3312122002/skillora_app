@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:notes_tasks/core/widgets/app_navbar_container.dart';
 import 'package:notes_tasks/core/widgets/app_scafold.dart';
 import 'package:notes_tasks/core/widgets/custom_text_field.dart';
 import 'package:notes_tasks/core/widgets/primary_button.dart';
@@ -41,7 +42,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 👤 Username Field
+          // Username Field
           AppCustomTextField(
             controller: usernameController,
             label: 'username'.tr(),
@@ -49,7 +50,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
           SizedBox(height: AppSpacing.spaceMD),
 
-          // 🔒 Password Field
+          //  Password Field
           AppCustomTextField(
             controller: passwordController,
             label: 'password'.tr(),
@@ -79,7 +80,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (_) => UsersListScreen()),
+                  MaterialPageRoute(builder: (_) => AppNavBarContainer()),
                   (route) => false,
                 );
               });
