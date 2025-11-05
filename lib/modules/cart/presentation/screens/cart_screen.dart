@@ -82,7 +82,6 @@ class _FirstCartScreenState extends ConsumerState<FirstCartScreen> {
                     const SizedBox(
                       width: 16,
                     ), // <--- إضافة مسافة بين الملخص والزر
-
                     // 2. زر إتمام الطلب (يحتل مساحة أقل)
                     Expanded(
                       flex: 4, // نمنحه وزن 4 (لأن زر الشراء مهم ويحتاج مساحة)
@@ -113,6 +112,7 @@ class _FirstCartScreenState extends ConsumerState<FirstCartScreen> {
               ref.read(getFirstCartViewModelProvider.notifier).fetchFirstCart(),
         ),
       ),
+      actions: [],
     );
   }
 }

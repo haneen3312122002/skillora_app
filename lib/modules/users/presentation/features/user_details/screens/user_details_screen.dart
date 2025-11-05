@@ -121,6 +121,7 @@ class _UserDetailsScreenState extends ConsumerState<UserDetailsScreen> {
           const SizedBox(height: 20),
         ],
       ),
+      actions: [],
     );
   }
 }

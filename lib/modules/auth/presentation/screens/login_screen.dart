@@ -101,6 +101,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ],
       ),
+      actions: [],
     );
   }
 }

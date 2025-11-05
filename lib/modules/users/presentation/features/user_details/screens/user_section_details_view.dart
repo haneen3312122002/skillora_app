@@ -57,6 +57,7 @@ class UserSectionDetailsView<T> extends ConsumerWidget {
           );
         },
       ),
+      actions: [],
     );
   }
 }
