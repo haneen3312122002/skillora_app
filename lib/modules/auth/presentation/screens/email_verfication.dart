@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:notes_tasks/core/constants/spacing.dart';
-import 'package:notes_tasks/core/services/firebase/firebase_providers.dart';
+import 'package:notes_tasks/core/providers/firebase/firebase_providers.dart';
 import 'package:notes_tasks/core/widgets/app_navbar_container.dart';
 import 'package:notes_tasks/core/widgets/app_scaffold.dart';
 import 'package:notes_tasks/core/widgets/app_text_link.dart';
 import 'package:notes_tasks/core/widgets/error_view.dart';
 import 'package:notes_tasks/core/widgets/loading_indicator.dart';
 import 'package:notes_tasks/core/widgets/primary_button.dart';
-import 'package:notes_tasks/modules/auth/presentation/providers/firebase/email_verified_stream_provider.dart';
+import 'package:notes_tasks/core/providers/firebase/auth/email_verified_stream_provider.dart';
 import 'package:notes_tasks/modules/auth/presentation/screens/login_screen.dart';
 
 class VerifyEmailScreen extends ConsumerWidget {

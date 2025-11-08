@@ -1,14 +1,15 @@
+// lib/modules/auth/presentation/providers/firebase/email_verified_stream_provider.dart
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:notes_tasks/core/providers/firebase/firebase_providers.dart';
 
 final emailVerifiedStreamProvider = StreamProvider<bool>((ref) async* {
-  final auth = fb.FirebaseAuth.instance;
+  final auth = ref.read(firebaseAuthProvider); // ✅ بدل instance المباشر
 
-  // Emit initial value quickly
+  // قيمة أولية سريعة
   yield auth.currentUser?.emailVerified ?? false;
 
-  // Poll every 2 seconds; stop when provider is disposed.
+  // polling بسيط كل ثانيتين
   final controller = StreamController<bool>();
   final timer = Timer.periodic(const Duration(seconds: 2), (_) async {
     final u = auth.currentUser;
@@ -17,10 +18,10 @@ final emailVerifiedStreamProvider = StreamProvider<bool>((ref) async* {
       return;
     }
     try {
-      await u.reload();
+      await u.reload(); // تحديث من الخادم
       controller.add(auth.currentUser?.emailVerified ?? false);
     } catch (_) {
-      // ignore errors and keep polling
+      // تجاهل الأخطاء المؤقتة واستمر
     }
   });
 

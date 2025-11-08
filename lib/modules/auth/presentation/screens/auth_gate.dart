@@ -1,7 +1,7 @@
 // lib/core/widgets/auth_gate.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:notes_tasks/modules/auth/presentation/providers/firebase/auth_state_provider.dart';
+import 'package:notes_tasks/core/providers/firebase/auth/auth_state_provider.dart';
 import 'package:notes_tasks/modules/auth/presentation/screens/email_verfication.dart';
 import 'package:notes_tasks/modules/auth/presentation/screens/login_screen.dart';
 import 'package:notes_tasks/core/widgets/app_navbar_container.dart'; // شاشتك الرئيسية

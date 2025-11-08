@@ -4,7 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:notes_tasks/core/widgets/app_card.dart';
 import 'package:notes_tasks/core/widgets/app_list_tile.dart';
 import 'package:notes_tasks/core/widgets/app_scaffold.dart';
-import 'package:notes_tasks/core/widgets/empty_vieq.dart';
+import 'package:notes_tasks/core/widgets/empty_view.dart';
 import 'package:notes_tasks/core/widgets/error_view.dart';
 import 'package:notes_tasks/core/widgets/loading_indicator.dart';
 
@@ -28,12 +28,10 @@ class UserSectionDetailsView<T> extends ConsumerWidget {
       title: title,
       body: state.when(
         loading: () => const LoadingIndicator(withBackground: false),
-
         error: (e, _) => ErrorView(
           fullScreen: true,
           message: 'failed_load_tasks'.tr(), // 🔹 ترجمة عامة لرسائل الخطأ
         ),
-
         data: (data) {
           if (data == null) {
             return EmptyView(message: 'no_data'.tr());

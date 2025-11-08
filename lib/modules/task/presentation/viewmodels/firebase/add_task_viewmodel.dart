@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:notes_tasks/modules/task/presentation/providers/firebase/add_task_service_provider.dart';
+import 'package:notes_tasks/core/providers/firebase/tasks/add_task_service_provider.dart';
 
 final addTaskViewModelProvider =
     AsyncNotifierProvider<AddTaskViewModel, String?>(AddTaskViewModel.new);

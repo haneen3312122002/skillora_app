@@ -4,7 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:notes_tasks/core/widgets/app_dialog.dart';
 import 'package:notes_tasks/core/widgets/app_fab.dart';
 import 'package:notes_tasks/core/widgets/app_scaffold.dart';
-import 'package:notes_tasks/core/widgets/empty_vieq.dart';
+import 'package:notes_tasks/core/widgets/empty_view.dart';
 import 'package:notes_tasks/core/widgets/error_view.dart';
 import 'package:notes_tasks/core/widgets/loading_indicator.dart';
 import 'package:notes_tasks/core/widgets/app_card.dart';

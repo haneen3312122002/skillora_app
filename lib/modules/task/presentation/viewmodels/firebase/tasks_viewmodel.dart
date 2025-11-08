@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:notes_tasks/modules/task/domain/entities/task_entity.dart';
-import 'package:notes_tasks/modules/task/presentation/providers/firebase/get_tasks_service_provider.dart';
+import 'package:notes_tasks/core/providers/firebase/tasks/get_tasks_service_provider.dart';
 
 final tasksViewModelProvider =
     StreamNotifierProvider<TasksViewModel, List<TaskEntity>>(

@@ -1,13 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:notes_tasks/core/widgets/empty_view.dart';
 import 'package:notes_tasks/core/widgets/primary_button.dart';
 import 'package:notes_tasks/modules/cart/domain/entities/cart_entity.dart';
 import 'package:notes_tasks/modules/cart/presentation/viewmodels/get_first_cart_viewmodel.dart';
 import 'package:notes_tasks/modules/cart/presentation/widgets/product_item.dart';
 import 'package:notes_tasks/modules/cart/presentation/widgets/cart_summary.dart';
 import 'package:notes_tasks/core/widgets/app_scaffold.dart';
-import 'package:notes_tasks/core/widgets/empty_vieq.dart';
 import 'package:notes_tasks/core/widgets/error_view.dart';
 import 'package:notes_tasks/core/widgets/loading_indicator.dart';
 

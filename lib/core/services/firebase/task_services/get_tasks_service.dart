@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
-import '../../domain/entities/task_entity.dart';
+import '../../../../modules/task/domain/entities/task_entity.dart';
 
 class GetTasksService {
   final FirebaseFirestore db;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:notes_tasks/core/constants/spacing.dart';
-import 'package:notes_tasks/core/services/firebase/firebase_providers.dart';
+import 'package:notes_tasks/core/providers/firebase/firebase_providers.dart';
 import 'package:notes_tasks/core/theme/viewmodels/theme_viewmodel.dart';
 import 'package:notes_tasks/modules/auth/presentation/screens/login_screen.dart'; // ✅ للانتقال بعد الخروج
 
@@ -12,7 +12,7 @@ class AppScaffold extends ConsumerWidget {
   final bool usePadding;
   final bool scrollable;
   final Widget? floatingActionButton;
-  final Widget? bottomNavBasr;
+  final Widget? bottomNavBar;
   final bool showLogout; // ✅ جديد
   final VoidCallback? onLogout; // ✅ لو بدك سلوك مخصص بعد الخروج
 
@@ -23,7 +23,7 @@ class AppScaffold extends ConsumerWidget {
     this.usePadding = true,
     this.scrollable = true,
     this.floatingActionButton,
-    this.bottomNavBasr,
+    this.bottomNavBar,
     this.showLogout = false, // افتراضياً غير مفعلة
     this.onLogout,
     required List<IconButton>
@@ -101,7 +101,7 @@ class AppScaffold extends ConsumerWidget {
             )
           : null,
       floatingActionButton: floatingActionButton,
-      bottomNavigationBar: bottomNavBasr,
+      bottomNavigationBar: bottomNavBar,
       body: SafeArea(
         child: scrollable
             ? SingleChildScrollView(
