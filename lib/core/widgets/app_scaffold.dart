@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:notes_tasks/core/constants/spacing.dart';
+import 'package:notes_tasks/core/services/firebase/firebase_providers.dart';
 import 'package:notes_tasks/core/theme/viewmodels/theme_viewmodel.dart';
-import '../constants/spacing.dart';
+import 'package:notes_tasks/modules/auth/presentation/screens/login_screen.dart'; // ✅ للانتقال بعد الخروج
 
 class AppScaffold extends ConsumerWidget {
   final String? title;
@@ -11,29 +13,31 @@ class AppScaffold extends ConsumerWidget {
   final bool scrollable;
   final Widget? floatingActionButton;
   final Widget? bottomNavBasr;
+  final bool showLogout; // ✅ جديد
+  final VoidCallback? onLogout; // ✅ لو بدك سلوك مخصص بعد الخروج
 
   const AppScaffold({
     this.title,
-    this.bottomNavBasr,
     required this.body,
     this.centerTitle = true,
     this.usePadding = true,
     this.scrollable = true,
     this.floatingActionButton,
-    required List<IconButton> actions,
+    this.bottomNavBasr,
+    this.showLogout = false, // افتراضياً غير مفعلة
+    this.onLogout,
+    required List<IconButton>
+        actions, // هذا مش مستخدم فعلياً بس نتركه لتوافق الكود
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final themeMode = ref.watch(themeProvider);
+    final authService = ref.read(authServiceProvider); // ✅ الوصول لخدمة الخروج
 
-    IconData icon;
-    if (themeMode == ThemeMode.dark) {
-      icon = Icons.wb_sunny; // Show sun when currently in dark
-    } else {
-      icon = Icons.nightlight_round; // Show moon when currently in light/system
-    }
+    IconData icon =
+        themeMode == ThemeMode.dark ? Icons.wb_sunny : Icons.nightlight_round;
 
     final content = usePadding
         ? Padding(
@@ -47,7 +51,6 @@ class AppScaffold extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-
       appBar: title != null
           ? AppBar(
               centerTitle: centerTitle,
@@ -60,6 +63,7 @@ class AppScaffold extends ConsumerWidget {
               backgroundColor: theme.appBarTheme.backgroundColor,
               elevation: theme.appBarTheme.elevation,
               actions: [
+                // 🌗 زر تبديل الثيم
                 IconButton(
                   icon: Icon(icon),
                   onPressed: () {
@@ -72,13 +76,32 @@ class AppScaffold extends ConsumerWidget {
                     }
                   },
                 ),
+                // 🚪 زر تسجيل الخروج (اختياري)
+                if (showLogout)
+                  IconButton(
+                    icon: const Icon(Icons.logout),
+                    tooltip: 'Logout',
+                    onPressed: () async {
+                      await authService.logout();
+                      if (onLogout != null) {
+                        onLogout!();
+                      } else {
+                        // الانتقال الافتراضي إلى شاشة تسجيل الدخول
+                        if (context.mounted) {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (_) => const LoginScreen()),
+                            (route) => false,
+                          );
+                        }
+                      }
+                    },
+                  ),
               ],
             )
           : null,
-
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavBasr,
-
       body: SafeArea(
         child: scrollable
             ? SingleChildScrollView(

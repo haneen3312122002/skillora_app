@@ -1,8 +1,8 @@
 class TaskEntity {
-  final int id;
+  final String id;
   final String todo;
   final bool completed;
-  final int userId;
+  final String userId;
 
   const TaskEntity({
     required this.id,

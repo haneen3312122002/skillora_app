@@ -30,7 +30,16 @@
   "failed_load_users": "Failed to load users",
    "first_cart": "My Cart",
    "no_cart_found": "No cart found.",
-   "checkout": "Checkout"
-
-
+   "checkout": "Checkout",
+   "email": "Email",
+   "name": "Name",
+   "register": "Register",
+   "something_went_wrong": "Something went wrong. Please try again.",
+   "create_account": "Create account",
+   "back_to_login": "Back to login",
+   "verify_email_title": "Verify Email",
+  "verify_email_instructions": "Please verify your email address.\nWe sent a confirmation link to:",
+  "resend_verification_link": "Resend verification link",
+  "verification_email_sent": "Verification email sent again!",
+  "verification_send_failed": "Failed to send: {error}"
 }

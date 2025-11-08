@@ -4,10 +4,11 @@ import 'package:notes_tasks/modules/task/domain/entities/task_entity.dart';
 import 'package:notes_tasks/modules/task/domain/usecases/add_task_usecase.dart';
 import 'package:notes_tasks/modules/task/presentation/providers/add_task_provider.dart';
 
-final addTaskViewModelProvider =
-    AsyncNotifierProvider<AddTaskViewModel, TaskEntity?>(AddTaskViewModel.new);
+final _addTaskViewModelProvider =
+    AsyncNotifierProvider<_AddTaskViewModel, TaskEntity?>(
+        _AddTaskViewModel.new);
 
-class AddTaskViewModel extends AsyncNotifier<TaskEntity?> {
+class _AddTaskViewModel extends AsyncNotifier<TaskEntity?> {
   late final AddTaskUseCase _addTaskUseCase = ref.read(addTaskUseCaseProvider);
 
   @override

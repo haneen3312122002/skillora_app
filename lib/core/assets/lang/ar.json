@@ -30,6 +30,16 @@
   "failed_load_users": "فشل تحميل المستخدمين",
   "first_cart": "سلتي",
   "no_cart_found": "لا توجد سلة بعد",
-  "checkout": "إتمام الطلب"
-
+  "checkout": "إتمام الطلب",
+  "email": "البريد الإلكتروني",
+  "name": "الاسم",
+  "register": "إنشاء حساب",
+  "something_went_wrong": "حدث خطأ ما. حاول مرة أخرى.",
+  "create_account": "إنشاء حساب",
+  "back_to_login": "العودة لتسجيل الدخول",
+  "verify_email_title": "تأكيد البريد الإلكتروني",
+  "verify_email_instructions": "رجاءً قم بتأكيد بريدك الإلكتروني.\nأرسلنا رابط التفعيل إلى:",
+  "resend_verification_link": "إعادة إرسال رابط التفعيل",
+  "verification_email_sent": "تم إرسال رسالة التفعيل مجددًا!",
+  "verification_send_failed": "فشل الإرسال: {error}"
 }

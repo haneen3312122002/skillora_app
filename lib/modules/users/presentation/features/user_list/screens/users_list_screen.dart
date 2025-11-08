@@ -17,6 +17,7 @@ class UsersListScreen extends ConsumerWidget {
     final viewModel = ref.read(getBasicUsersViewModelProvider.notifier);
 
     return AppScaffold(
+      showLogout: true,
       scrollable: false,
       title: 'users_title'.tr(), // ✅ ترجمة العنوان
       actions: [

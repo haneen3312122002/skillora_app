@@ -32,6 +32,7 @@ class _FirstCartScreenState extends ConsumerState<FirstCartScreen> {
     final cartState = ref.watch(getFirstCartViewModelProvider);
 
     return AppScaffold(
+      showLogout: true,
       title: '${'first_cart'.tr()}',
       scrollable: false,
       body: cartState.when(
@@ -49,42 +50,33 @@ class _FirstCartScreenState extends ConsumerState<FirstCartScreen> {
                         .read(getFirstCartViewModelProvider.notifier)
                         .fetchFirstCart();
                   },
-
                   child: ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
-
                     padding: const EdgeInsets.all(16),
-
                     children: [
                       const Divider(height: 30),
-
                       ...cart.products.map((p) => ProductItem(product: p)),
                     ],
                   ),
                 ),
               ),
-
               Padding(
                 padding: const EdgeInsets.all(16.0),
-
                 child: Row(
                   mainAxisAlignment:
                       MainAxisAlignment.spaceBetween, // <--- هام: لنشر العناصر
 
                   children: [
                     Expanded(flex: 3, child: CartSummary(cart: cart)),
-
                     const SizedBox(width: 16),
                     Expanded(
                       flex: 4, //
 
                       child: AppPrimaryButton(
                         label: 'checkout'.tr(),
-
                         onPressed: () {
                           print('Proceeding to Checkout!');
                         },
-
                         icon: Icons.shopping_bag_outlined,
                       ),
                     ),

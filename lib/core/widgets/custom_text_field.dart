@@ -10,6 +10,9 @@ class AppCustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
 
+  /// 👇 الإضافة الجديدة:
+  final void Function(String)? onSubmitted;
+
   const AppCustomTextField({
     super.key,
     required this.controller,
@@ -20,6 +23,7 @@ class AppCustomTextField extends StatelessWidget {
     this.inputAction,
     this.keyboardType,
     this.validator,
+    this.onSubmitted, // 👈 الإضافة الجديدة
   });
 
   @override
@@ -31,7 +35,11 @@ class AppCustomTextField extends StatelessWidget {
       textInputAction: inputAction,
       keyboardType: keyboardType,
       validator: validator,
-      decoration: InputDecoration(labelText: label, hintText: hint),
+      onFieldSubmitted: onSubmitted, // 👈 استخدمها هنا
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+      ),
     );
   }
 }
