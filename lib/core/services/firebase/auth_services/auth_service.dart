@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class AuthService {
@@ -55,5 +56,19 @@ class AuthService {
     if (user == null) return false;
     await user.reload();
     return user.emailVerified;
+  }
+
+  //reset password:
+  Future<String?> resetPassword(String email) async {
+    try {
+      await auth.sendPasswordResetEmail(email: email);
+      return null; //no error
+    } on FirebaseAuthException catch (e) {
+      //type of the error:firebase
+      // error
+      return e.message ?? 'somthing went wrong';
+    } catch (e) {
+      return 'error';
+    }
   }
 }

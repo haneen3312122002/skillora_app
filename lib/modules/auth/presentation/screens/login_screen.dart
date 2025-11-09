@@ -11,6 +11,7 @@ import 'package:notes_tasks/core/widgets/loading_indicator.dart';
 import 'package:notes_tasks/core/widgets/error_view.dart';
 import 'package:notes_tasks/core/constants/spacing.dart';
 import 'package:notes_tasks/modules/auth/presentation/screens/register.dart';
+import 'package:notes_tasks/modules/auth/presentation/screens/reset_password.dart';
 import 'package:notes_tasks/modules/auth/presentation/viewmodels/firebase/login_firebase_viewmodel.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -55,6 +56,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               await loginNotifier.login(
                 email: emailController.text.trim(),
                 password: passwordController.text.trim(),
+              );
+            },
+          ),
+          SizedBox(height: AppSpacing.spaceSM),
+          AppTextLink(
+            textKey: 'forget password?',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
               );
             },
           ),

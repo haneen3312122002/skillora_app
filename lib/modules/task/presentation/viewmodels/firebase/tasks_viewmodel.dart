@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:notes_tasks/core/providers/firebase/tasks/task_service_provider.dart';
 import 'package:notes_tasks/modules/task/domain/entities/task_entity.dart';
-import 'package:notes_tasks/core/providers/firebase/tasks/get_tasks_service_provider.dart';
 
 final tasksViewModelProvider =
     StreamNotifierProvider<TasksViewModel, List<TaskEntity>>(
@@ -9,7 +9,7 @@ final tasksViewModelProvider =
 class TasksViewModel extends StreamNotifier<List<TaskEntity>> {
   @override
   Stream<List<TaskEntity>> build() {
-    final svc = ref.read(getTasksServiceProvider);
+    final svc = ref.read(TaskServiceProvider);
     return svc.streamTasks();
   }
 

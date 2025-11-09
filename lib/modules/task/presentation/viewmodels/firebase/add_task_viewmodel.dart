@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:notes_tasks/core/providers/firebase/tasks/add_task_service_provider.dart';
+import 'package:notes_tasks/core/providers/firebase/tasks/task_service_provider.dart';
 
 final addTaskViewModelProvider =
     AsyncNotifierProvider<AddTaskViewModel, String?>(AddTaskViewModel.new);
@@ -21,7 +21,7 @@ class AddTaskViewModel extends AsyncNotifier<String?> {
 
     state = const AsyncLoading();
     try {
-      final svc = ref.read(addTaskServiceProvider);
+      final svc = ref.read(TaskServiceProvider);
       final id = await svc.addTask(title: title);
       state = AsyncData(id);
       _snack(context, 'Task added');

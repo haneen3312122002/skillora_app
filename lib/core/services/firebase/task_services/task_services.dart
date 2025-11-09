@@ -1,12 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
-import '../../../../modules/task/domain/entities/task_entity.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:notes_tasks/modules/task/domain/entities/task_entity.dart';
 
-class GetTasksService {
-  final FirebaseFirestore db;
+class TaskService {
   final fb.FirebaseAuth auth;
-  GetTasksService({required this.db, required this.auth});
+  final FirebaseFirestore db;
 
+  TaskService({required this.auth, required this.db});
+//get tasks:
   Stream<List<TaskEntity>> streamTasks() {
     final u = auth.currentUser;
     if (u == null) {
@@ -28,4 +29,18 @@ class GetTasksService {
               );
             }).toList());
   }
+
+//add task
+  Future<String> addTask({required String title, bool done = false}) async {
+    final u = auth.currentUser;
+    if (u == null) throw StateError('Not authenticated');
+    final ref =
+        await db.collection('users').doc(u.uid).collection('tasks').add({
+      'title': title,
+      'done': done,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+    return ref.id;
+  }
+  //update task
 }
