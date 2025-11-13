@@ -38,6 +38,10 @@ class AppNavBar extends StatelessWidget {
           icon: Icon(Icons.shopping_basket_outlined),
           label: 'Carts',
         ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'My Profile',
+        ),
       ],
     );
   }
