@@ -3,11 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:notes_tasks/core/widgets/app_card.dart';
 import 'package:notes_tasks/core/widgets/app_list_tile.dart';
-import 'package:notes_tasks/core/widgets/app_dialog.dart';
-import 'package:notes_tasks/modules/profile/presentation/viewmodels/UpdateEmailViewModel.dart';
-import 'package:notes_tasks/modules/profile/presentation/viewmodels/UpdateNameViewModel.dart';
 
-import 'edit_field_dialog_content.dart';
+import 'package:notes_tasks/modules/profile/services/photo_services.dart';
 
 class ProfileActionsCard extends ConsumerWidget {
   final Map<String, dynamic> profile;
@@ -24,7 +21,7 @@ class ProfileActionsCard extends ConsumerWidget {
             title: 'Edit name',
             subtitle: profile['name'] ?? '',
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => _showEditNameDialog(context, ref),
+            onTap: () => showEditNameDialog(context, ref, profile),
           ),
           const Divider(),
           AppListTile(
@@ -32,46 +29,9 @@ class ProfileActionsCard extends ConsumerWidget {
             title: 'Edit email',
             subtitle: profile['email'] ?? '',
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => _showEditEmailDialog(context, ref),
+            onTap: () => showEditEmailDialog(context, ref, profile),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showEditNameDialog(BuildContext context, WidgetRef ref) {
-    final controller = TextEditingController(text: profile['name']);
-
-    AppDialog.show(
-      context: context,
-      title: 'Edit name',
-      content: EditFieldDialogContent(
-        controller: controller,
-        label: 'Name',
-        onSave: (value) async {
-          await ref
-              .read(updateNameViewModelProvider.notifier)
-              .submit(context, rawName: value);
-        },
-      ),
-    );
-  }
-
-  void _showEditEmailDialog(BuildContext context, WidgetRef ref) {
-    final controller = TextEditingController(text: profile['email']);
-
-    AppDialog.show(
-      context: context,
-      title: 'Edit email',
-      content: EditFieldDialogContent(
-        controller: controller,
-        label: 'Email',
-        keyboardType: TextInputType.emailAddress,
-        onSave: (value) async {
-          await ref
-              .read(updateEmailViewModelProvider.notifier)
-              .submit(context, rawEmail: value);
-        },
       ),
     );
   }

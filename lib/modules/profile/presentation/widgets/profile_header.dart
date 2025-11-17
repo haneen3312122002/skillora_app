@@ -24,48 +24,46 @@ class ProfileHeader extends ConsumerWidget {
     final uploadAvatarState = ref.watch(uploadProfileImageViewModelProvider);
     final uploadCoverState = ref.watch(uploadCoverImageViewModelProvider);
 
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          //cover
-          Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              CoverImage(
-                coverUrl: coverUrl,
-                isLoading: uploadCoverState.isLoading,
-                onChangeCover: () => pickAndUploadCover(context, ref),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        //cover
+        Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            CoverImage(
+              coverUrl: coverUrl,
+              isLoading: uploadCoverState.isLoading,
+              onChangeCover: () => pickAndUploadCover(context, ref),
+            ),
+            Positioned(
+              bottom: -40,
+              child: AvatarWithEdit(
+                photoUrl: photoUrl,
+                isLoading: uploadAvatarState.isLoading,
+                onChangeAvatar: () => pickAndUploadAvatar(context, ref),
               ),
-              Positioned(
-                bottom: -40,
-                child: AvatarWithEdit(
-                  photoUrl: photoUrl,
-                  isLoading: uploadAvatarState.isLoading,
-                  onChangeAvatar: () => pickAndUploadAvatar(context, ref),
-                ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 48),
+        Center(
+          child: Column(
+            children: [
+              Text(
+                name,
+                style: AppTextStyles.title,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                email,
+                style: AppTextStyles.caption
+                    .copyWith(color: AppColors.textPrimary.withOpacity(0.7)),
               ),
             ],
           ),
-          const SizedBox(height: 48),
-          Center(
-            child: Column(
-              children: [
-                Text(
-                  name,
-                  style: AppTextStyles.title,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  email,
-                  style: AppTextStyles.caption
-                      .copyWith(color: AppColors.textPrimary.withOpacity(0.7)),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

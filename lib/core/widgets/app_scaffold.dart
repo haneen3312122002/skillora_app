@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:notes_tasks/core/constants/spacing.dart';
 import 'package:notes_tasks/core/providers/firebase/firebase_providers.dart';
 import 'package:notes_tasks/core/theme/viewmodels/theme_viewmodel.dart';
@@ -86,13 +87,8 @@ class AppScaffold extends ConsumerWidget {
                       if (onLogout != null) {
                         onLogout!();
                       } else {
-                        // الانتقال الافتراضي إلى شاشة تسجيل الدخول
                         if (context.mounted) {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                                builder: (_) => const LoginScreen()),
-                            (route) => false,
-                          );
+                          context.pushReplacement('/login');
                         }
                       }
                     },

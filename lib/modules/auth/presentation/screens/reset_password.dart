@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:notes_tasks/core/widgets/app_scaffold.dart';
 import 'package:notes_tasks/core/widgets/custom_text_field.dart';
@@ -79,10 +80,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             child: AppTextLink(
               textKey: 'back_to_login',
               onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                );
+                context.pushReplacement('/login');
               },
             ),
           ),

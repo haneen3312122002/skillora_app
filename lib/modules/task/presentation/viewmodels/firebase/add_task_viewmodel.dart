@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:notes_tasks/core/providers/firebase/tasks/task_service_provider.dart';
 
 final addTaskViewModelProvider =
@@ -25,7 +26,7 @@ class AddTaskViewModel extends AsyncNotifier<String?> {
       final id = await svc.addTask(title: title);
       state = AsyncData(id);
       _snack(context, 'Task added');
-      Navigator.pop(context);
+      context.pop();
     } catch (e, st) {
       state = AsyncError(e, st);
       _snack(context, 'Failed: $e');

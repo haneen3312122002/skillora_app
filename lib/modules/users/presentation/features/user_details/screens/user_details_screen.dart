@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
 import 'package:notes_tasks/core/widgets/app_card.dart';
 import 'package:notes_tasks/core/widgets/app_list_tile.dart';
 import 'package:notes_tasks/core/widgets/app_scaffold.dart';
 import 'package:notes_tasks/modules/users/domain/entities/user_entity.dart';
 import 'package:notes_tasks/modules/users/presentation/features/user_details/screens/user_section_details_view.dart';
+import 'package:notes_tasks/modules/users/presentation/features/user_details/user_section_details_args.dart';
 import 'package:notes_tasks/modules/users/presentation/features/user_details/viewmodels/get_user_address_viewmodel.dart';
 import 'package:notes_tasks/modules/users/presentation/features/user_details/viewmodels/get_user_bank_viewmodel.dart';
 import 'package:notes_tasks/modules/users/presentation/features/user_details/viewmodels/get_user_company_viewmodel.dart';
@@ -53,17 +55,15 @@ class _UserDetailsScreenState extends ConsumerState<UserDetailsScreen> {
               title: 'address_info'.tr(),
               trailing: const Icon(Icons.arrow_forward_ios, size: 18),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => UserSectionDetailsView<AddressEntity>(
-                      title: 'address_details'.tr(),
-                      provider: getUserAddressViewModelProvider,
-                      mapper: (data) => {
-                        'country'.tr(): data.country,
-                        'city'.tr(): data.city,
-                      },
-                    ),
+                context.push(
+                  '/user-section-details',
+                  extra: UserSectionDetailsArgs<AddressEntity>(
+                    title: 'address_details'.tr(),
+                    provider: getUserAddressViewModelProvider,
+                    mapper: (data) => {
+                      'country'.tr(): data.country,
+                      'city'.tr(): data.city,
+                    },
                   ),
                 );
               },

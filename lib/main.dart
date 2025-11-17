@@ -1,10 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:notes_tasks/core/routs/app_router.dart';
 import 'package:notes_tasks/core/services/firebase/firebase_initializer.dart';
-import 'package:notes_tasks/modules/auth/presentation/screens/auth_gate.dart';
 
 import 'firebase_options.dart';
 import 'package:notes_tasks/core/theme/app_theme.dart';
@@ -33,21 +32,23 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeProvider);
+    final router = ref.watch(goRouterProvider);
 
     return ScreenUtilInit(
       designSize: const Size(390, 844),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
-        return MaterialApp(
+        return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          routerConfig: router,
           title: 'Notes Tasks',
-          theme: AppTheme.lightTheme, // لازم تكون getters
-          darkTheme: AppTheme.darkTheme, // لازم تكون getters
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
           themeMode: themeMode,
           localizationsDelegates: context.localizationDelegates,
           supportedLocales: context.supportedLocales,
           locale: context.locale,
-          home: AuthGate(),
         );
       },
     );

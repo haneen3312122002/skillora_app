@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
 import 'package:notes_tasks/core/constants/spacing.dart';
 import 'package:notes_tasks/core/providers/firebase/firebase_providers.dart';
 import 'package:notes_tasks/core/widgets/app_navbar_container.dart';
@@ -29,11 +30,7 @@ class VerifyEmailScreen extends ConsumerWidget {
             if (isVerified) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (context.mounted) {
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                        builder: (_) => const AppNavBarContainer()),
-                    (route) => false,
-                  );
+                  context.push('/');
                 }
               });
               return const SizedBox();
@@ -89,11 +86,7 @@ class VerifyEmailScreen extends ConsumerWidget {
                     onPressed: () async {
                       await authService.logout();
                       if (context.mounted) {
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(
-                              builder: (_) => const LoginScreen()),
-                          (route) => false,
-                        );
+                        context.pushReplacement('/login');
                       }
                     },
                   ),

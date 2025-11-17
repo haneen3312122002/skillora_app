@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:notes_tasks/core/widgets/custom_text_field.dart';
 import 'package:notes_tasks/core/widgets/primary_button.dart';
 
@@ -17,8 +18,7 @@ class EditFieldDialogContent extends StatefulWidget {
   });
 
   @override
-  State<EditFieldDialogContent> createState() =>
-      _EditFieldDialogContentState();
+  State<EditFieldDialogContent> createState() => _EditFieldDialogContentState();
 }
 
 class _EditFieldDialogContentState extends State<EditFieldDialogContent> {
@@ -32,7 +32,7 @@ class _EditFieldDialogContentState extends State<EditFieldDialogContent> {
 
     try {
       await widget.onSave(value);
-      if (mounted) Navigator.pop(context);
+      if (mounted) context.pop();
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -55,8 +55,8 @@ class _EditFieldDialogContentState extends State<EditFieldDialogContent> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             TextButton(
-              onPressed: _isSaving ? null : () => Navigator.pop(context),
               child: const Text('Cancel'),
+              onPressed: _isSaving ? null : () => context.pop(),
             ),
             const SizedBox(width: 8),
             AppPrimaryButton(
