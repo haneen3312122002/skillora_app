@@ -63,7 +63,6 @@ class AppPrimaryButton extends StatelessWidget {
 
     return FadeIn(
       duration: animationDuration,
-      delay: delay,
       child: SlideIn(
         from: slideFrom,
         duration: animationDuration,

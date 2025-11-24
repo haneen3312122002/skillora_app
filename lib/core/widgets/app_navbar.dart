@@ -5,7 +5,11 @@ class AppNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
-  const AppNavBar({super.key, required this.currentIndex, required this.onTap});
+  const AppNavBar({
+    super.key,
+    required this.currentIndex,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,10 +19,9 @@ class AppNavBar extends StatelessWidget {
       currentIndex: currentIndex,
       onTap: onTap,
       type: BottomNavigationBarType.fixed,
-      backgroundColor: theme.colorScheme.surface, // 🔹 من الثيم
-      selectedItemColor: theme.colorScheme.primary, // 🔹 اللون الأساسي
-      unselectedItemColor:
-          theme.colorScheme.outline, // 🔹 لون العناصر غير المحددة
+      backgroundColor: theme.colorScheme.surface,
+      selectedItemColor: theme.colorScheme.primary,
+      unselectedItemColor: theme.colorScheme.outline,
       selectedLabelStyle: theme.textTheme.bodySmall?.copyWith(
         fontWeight: FontWeight.w600,
         color: theme.colorScheme.primary,
@@ -29,10 +32,10 @@ class AppNavBar extends StatelessWidget {
       items: [
         BottomNavigationBarItem(
           icon: AnimatedNavIcon(
-            icon: Icons.home,
+            icon: Icons.checklist_rounded,
             isActive: currentIndex == 0,
           ),
-          label: 'Posts',
+          label: 'Tasks',
         ),
         BottomNavigationBarItem(
           icon: AnimatedNavIcon(

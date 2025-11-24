@@ -58,7 +58,6 @@ class AppCustomTextField extends StatelessWidget {
 
     return FadeIn(
       duration: animationDuration,
-      delay: delay,
       child: SlideIn(
         from: slideFrom,
         duration: animationDuration,

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class FadeIn extends StatelessWidget {
   final Widget child;
   final Duration duration;
-  final Duration? delay;
+  final Duration delay;
   final Curve curve;
   final double begin;
   final double end;
@@ -20,17 +20,31 @@ class FadeIn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final totalMs = duration.inMilliseconds + delay.inMilliseconds;
+    final totalDuration = Duration(milliseconds: totalMs == 0 ? 1 : totalMs);
+    final delayFraction = totalMs == 0 ? 0.0 : delay.inMilliseconds / totalMs;
+
     return TweenAnimationBuilder<double>(
-      tween: Tween(begin: begin, end: end),
-      duration: duration,
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: totalDuration,
       curve: curve,
-      builder: (context, value, child) {
+      child: child,
+      builder: (context, t, child) {
+        double animT;
+        if (t <= delayFraction) {
+          animT = 0;
+        } else {
+          final progress = (t - delayFraction) / (1 - delayFraction);
+          animT = progress.clamp(0.0, 1.0);
+        }
+
+        final opacity = begin + (end - begin) * animT;
+
         return Opacity(
-          opacity: value,
+          opacity: opacity,
           child: child,
         );
       },
-      child: child,
     );
   }
 }
