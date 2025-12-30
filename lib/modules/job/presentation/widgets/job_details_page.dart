@@ -11,7 +11,6 @@ import 'package:notes_tasks/core/shared/widgets/pages/app_bottom_sheet.dart';
 import 'package:notes_tasks/core/shared/widgets/pages/deatiles_page.dart';
 import 'package:notes_tasks/core/shared/widgets/tags/app_tags_wrap.dart';
 
-import 'package:notes_tasks/modules/job/domain/entities/job_entity.dart';
 import 'package:notes_tasks/modules/job/presentation/providers/jobs_byid_stream_providers.dart';
 import 'package:notes_tasks/modules/job/presentation/viewmodels/job_cover_image_viewmodel.dart';
 import 'package:notes_tasks/modules/job/presentation/services/job_image_helpers.dart';

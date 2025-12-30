@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
@@ -47,7 +48,54 @@ class AuthService {
     return auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
-  Future<void> logout() => auth.signOut();
+  Future<void> _removeCurrentTokenFromUid(String uid) async {
+    final token = await FirebaseMessaging.instance.getToken();
+    if (token == null) return;
+
+    await db.collection('users').doc(uid).update({
+      'fcmTokens': FieldValue.arrayRemove([token]),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> _addCurrentTokenToUid(String uid) async {
+    final token = await FirebaseMessaging.instance.getToken();
+    if (token == null) return;
+
+    await db.collection('users').doc(uid).set({
+      'fcmTokens': FieldValue.arrayUnion([token]),
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+  }
+
+  Future<fb.UserCredential> switchAccountWithPassword({
+    required String email,
+    required String password,
+  }) async {
+    final oldUid = auth.currentUser?.uid;
+    if (oldUid != null) {
+      await _removeCurrentTokenFromUid(oldUid);
+    }
+
+    // ⚠️ هنا لازم credentials (email/pass) - ما في bypass رسمي بدونها
+    final cred = await auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    final newUid = cred.user?.uid;
+    if (newUid != null) {
+      await _addCurrentTokenToUid(newUid);
+    }
+
+    return cred;
+  }
+
+  Future<void> logout() async {
+    final uid = auth.currentUser?.uid;
+    if (uid != null) await _removeCurrentTokenFromUid(uid);
+    await auth.signOut();
+  }
 
   Future<void> sendEmailVerification() async {
     final user = auth.currentUser;

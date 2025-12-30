@@ -160,4 +160,16 @@ class JobsService {
         .snapshots()
         .map((snap) => snap.docs.map(JobModel.fromDoc).toList());
   }
+
+  Stream<List<JobEntity>> watchJobsByCategoryAndOpen({
+    required String category,
+    required bool isOpen,
+  }) {
+    return _jobsCol
+        .where('category', isEqualTo: category)
+        .where('isOpen', isEqualTo: isOpen)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snap) => snap.docs.map(JobModel.fromDoc).toList());
+  }
 }

@@ -5,6 +5,9 @@ import '../animation/slide_in.dart';
 
 class AppCard extends StatefulWidget {
   final Widget child;
+
+  /// ❌ لا يوجد padding افتراضي
+  /// لو بدك padding مرّريه صراحة من الصفحة
   final EdgeInsetsGeometry? padding;
 
   final bool animate;
@@ -33,7 +36,7 @@ class _AppCardState extends State<AppCard> {
     final cardTheme = theme.cardTheme;
     final radius = (cardTheme.shape is RoundedRectangleBorder)
         ? (cardTheme.shape as RoundedRectangleBorder).borderRadius
-        : BorderRadius.circular(16);
+        : BorderRadius.circular(AppSpacing.r(16));
 
     Widget card = MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -41,8 +44,8 @@ class _AppCardState extends State<AppCard> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
-        margin: cardTheme.margin,
-        padding: widget.padding ?? EdgeInsets.all(AppSpacing.sectionPadding),
+        margin: cardTheme.margin, // فقط margin من الثيم
+        padding: widget.padding, // ✅ null = لا padding
         decoration: BoxDecoration(
           color: cardTheme.color,
           borderRadius: radius,

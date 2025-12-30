@@ -20,6 +20,7 @@ import 'package:notes_tasks/modules/home/presentation/screens/home_screen.dart';
 import 'package:notes_tasks/modules/home/presentation/screens/jobs_by_category_page.dart';
 
 import 'package:notes_tasks/modules/job/presentation/widgets/job_details_page.dart';
+import 'package:notes_tasks/modules/notifications/presentation/screens/notifications_page.dart';
 
 import 'package:notes_tasks/modules/profile/presentation/screens/profile_screen.dart';
 import 'package:notes_tasks/modules/profile/presentation/widgets/project/project_deatil_page.dart';
@@ -139,10 +140,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             path: AppRoutes.clientHome,
             builder: (_, __) => const HomePage(),
           ),
-          // GoRoute(
-          //   path: AppRoutes.clientNotifications,
-          //   builder: (_, __) => const NotificationsPage(),
-          // ),
+          GoRoute(
+            path: AppRoutes.clientNotifications,
+            builder: (_, __) => const NotificationsPage(),
+          ),
           GoRoute(
             path: AppRoutes.clientChats,
             builder: (_, __) => const ChatsListScreen(),
@@ -162,10 +163,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             path: AppRoutes.freelanceHome,
             builder: (_, __) => const HomePage(),
           ),
-          // GoRoute(
-          //   path: AppRoutes.freelancerNotifications,
-          //   builder: (_, __) => const NotificationsPage(),
-          // ),
+          GoRoute(
+            path: AppRoutes.freelancerNotifications,
+            builder: (_, __) => const NotificationsPage(),
+          ),
           GoRoute(
             path: AppRoutes.freelancerProposals,
             builder: (_, __) => const FreelancerProposalsListPage(),
@@ -185,6 +186,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     ],
     redirect: (context, state) {
       final loc = state.uri.path;
+      final isSwitchLogin =
+          loc == AppRoutes.login && state.uri.queryParameters['switch'] == '1';
 
       final isAuthRoute = loc == AppRoutes.login ||
           loc == AppRoutes.register ||
@@ -201,6 +204,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isJobsByCategoryRoute = loc == AppRoutes.jobsByCategory;
       final isProposealRoute = loc == AppRoutes.proposalDetails;
       final isChatDetailsRoute = loc.startsWith('${AppRoutes.chatDetails}/');
+      // ✅ Allow login page when switching accounts (even if already logged in)
+      if (isSwitchLogin) return null;
 
       // ✅ 1) auth loading
       if (authAsync.isLoading) {
@@ -233,23 +238,23 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       if (user.emailVerified && loc == AppRoutes.verifyEmail) {
         switch (role) {
           case UserRole.client:
-            return AppRoutes.clientNotifications;
+            return AppRoutes.clientHome;
           case UserRole.freelancer:
-            return AppRoutes.freelancerNotifications;
+            return AppRoutes.freelanceHome;
           case UserRole.admin:
             return AppRoutes.adminDashboard;
         }
       }
 
       // ✅ 6) if opened auth/loading/root
-      if (isAuthRoute ||
+      if ((isAuthRoute && !isSwitchLogin) ||
           isLoadingRoute ||
           (loc == '/' && !isResetPasswordRoute)) {
         switch (role) {
           case UserRole.client:
-            return AppRoutes.clientNotifications;
+            return AppRoutes.clientHome;
           case UserRole.freelancer:
-            return AppRoutes.freelancerNotifications;
+            return AppRoutes.freelanceHome;
           case UserRole.admin:
             return AppRoutes.adminDashboard;
         }
@@ -271,10 +276,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         final isFreelancer = loc.startsWith('/freelancer');
         final isAdmin = loc.startsWith('/admin');
 
-        if (role == UserRole.client && !isClient)
-          return AppRoutes.clientNotifications;
+        if (role == UserRole.client && !isClient) return AppRoutes.clientHome;
         if (role == UserRole.freelancer && !isFreelancer)
-          return AppRoutes.freelancerNotifications; // ✅ صح
+          return AppRoutes.freelanceHome; // ✅ صح
         if (role == UserRole.admin && !isAdmin) return AppRoutes.adminDashboard;
       }
 

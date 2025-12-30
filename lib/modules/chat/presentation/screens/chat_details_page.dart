@@ -5,14 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/shared/widgets/animation/chat/chat_input_bar.dart';
 import 'package:notes_tasks/core/shared/widgets/animation/chat/chat_message_bubble.dart';
+import 'package:notes_tasks/core/shared/widgets/common/app_scaffold.dart';
 import 'package:notes_tasks/core/shared/widgets/common/app_snackbar.dart';
 import 'package:notes_tasks/core/shared/widgets/common/error_view.dart';
+import 'package:notes_tasks/core/shared/widgets/common/empty_view.dart';
 import 'package:notes_tasks/core/data/remote/firebase/providers/firebase_providers.dart';
 
 import 'package:notes_tasks/modules/chat/presentation/providers/chat_providers.dart';
 import 'package:notes_tasks/modules/chat/domain/failures/chat_failure.dart';
-
-import 'package:notes_tasks/core/shared/widgets/common/empty_view.dart';
 import 'package:notes_tasks/modules/chat/presentation/viewmodels/chat_actions_viewmodel.dart';
 
 class ChatDetailsScreen extends ConsumerStatefulWidget {
@@ -27,6 +27,9 @@ class _ChatDetailsScreenState extends ConsumerState<ChatDetailsScreen> {
   final _ctrl = TextEditingController();
   late final ProviderSubscription _chatSub;
 
+  // ✅ optional: scroll controller لتحسين UX
+  final ScrollController _scroll = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -34,10 +37,15 @@ class _ChatDetailsScreenState extends ConsumerState<ChatDetailsScreen> {
     _chatSub = ref.listenManual(chatActionsViewModelProvider, (prev, next) {
       final wasLoading = prev?.isLoading ?? false;
       final nowSuccess = next.hasValue && !next.isLoading && !next.hasError;
+
       if (wasLoading && nowSuccess) {
         if (!mounted) return;
         _ctrl.clear();
+
+        // ✅ بعد إرسال رسالة: انزل لآخر الشات (reverse=true => offset 0)
+        _safeJumpToBottom();
       }
+
       next.whenOrNull(
         error: (e, _) {
           if (!mounted) return;
@@ -49,25 +57,34 @@ class _ChatDetailsScreenState extends ConsumerState<ChatDetailsScreen> {
     });
   }
 
+  void _safeJumpToBottom() {
+    if (!_scroll.hasClients) return;
+    // reverse:true => أحدث الرسائل تحت، والـ offset 0 هو أسفل
+    _scroll.animateTo(
+      0,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+    );
+  }
+
   @override
   void dispose() {
     _chatSub.close();
     _ctrl.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
   Future<void> _sendMessage() async {
+    final text = _ctrl.text.trim();
+    if (text.isEmpty) return;
+
     if (ref.read(chatActionsViewModelProvider).isLoading) return;
 
     await ref.read(chatActionsViewModelProvider.notifier).send(
           chatId: widget.chatId,
-          text: _ctrl.text,
+          text: text,
         );
-
-    final result = ref.read(chatActionsViewModelProvider);
-    if (!result.hasError && mounted) {
-      _ctrl.clear(); // ✅ مضمون
-    }
   }
 
   @override
@@ -77,8 +94,9 @@ class _ChatDetailsScreenState extends ConsumerState<ChatDetailsScreen> {
 
     final currentUserId = ref.read(firebaseAuthProvider).currentUser?.uid;
 
-    return Scaffold(
-      appBar: AppBar(title: Text('chat'.tr())),
+    return AppScaffold(
+      scrollable: false,
+      title: 'chat'.tr(),
       body: Column(
         children: [
           Expanded(
@@ -93,39 +111,58 @@ class _ChatDetailsScreenState extends ConsumerState<ChatDetailsScreen> {
               data: (messages) {
                 if (messages.isEmpty) {
                   return const EmptyView(
-                    // استعملي key إذا بدك
                     message: null,
                     icon: Icons.chat_bubble_outline,
                   );
                 }
 
+                // ✅ UX: أحدث الرسائل تحت
+                final list = messages.reversed.toList();
+
+                // ✅ بعد ما تجي رسائل جديدة: انزل للأسفل مرة واحدة (خفيف)
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _safeJumpToBottom();
+                });
+
                 return ListView.builder(
+                  controller: _scroll,
+                  reverse: true, // ✅ أهم سطر
                   padding: EdgeInsets.all(AppSpacing.spaceMD),
-                  itemCount: messages.length,
-                  // إذا messages عندك مرتبة من الأقدم للأحدث خلي reverse=true
-                  // reverse: true,
+                  itemCount: list.length,
                   itemBuilder: (_, i) {
-                    final m = messages[i];
+                    final m = list[i];
 
-                    // ✅ عدلي حسب موديلك: senderId / fromId / uid ...
-                    final senderId =
-                        ref.read(firebaseAuthProvider).currentUser?.uid;
-                    final isMe =
-                        (currentUserId != null && m.senderId == currentUserId);
+                    final isMe = (currentUserId != null &&
+                        (m.senderId == currentUserId));
 
-                    return ChatMessageBubble(
-                      text: m.text,
-                      isMe: isMe,
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: AppSpacing.spaceSM),
+                      child: ChatMessageBubble(
+                        text: m.text,
+                        isMe: isMe,
+                      ),
                     );
                   },
                 );
               },
             ),
           ),
-          ChatInputBar(
-            controller: _ctrl,
-            sending: sending,
-            onSend: _sendMessage,
+
+          // ✅ مهم عشان الكيبورد
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: AppSpacing.spaceMD,
+                right: AppSpacing.spaceMD,
+                bottom: AppSpacing.spaceSM,
+              ),
+              child: ChatInputBar(
+                controller: _ctrl,
+                sending: sending,
+                onSend: _sendMessage,
+              ),
+            ),
           ),
         ],
       ),
