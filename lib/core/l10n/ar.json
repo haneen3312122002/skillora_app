@@ -267,7 +267,19 @@
   "registration_failed": "فشلت عملية إنشاء الحساب، يرجى المحاولة لاحقًا",
   "something_went_wrong": "حدث خطأ ما، يرجى المحاولة لاحقًا",
   "operation_failed": "تعذّرت العملية. حاول مرة أخرى.",
-  "operation_done": "تمت العملية بنجاح."
+  "operation_done": "تمت العملية بنجاح.",
+  
+  "name_required": "الاسم مطلوب",
+  "email_required": "البريد الإلكتروني مطلوب",
+  "password_required": "كلمة المرور مطلوبة",
+
+  "invalid_password": "كلمة المرور لا تتبع الشروط المطلوبة",
+
+  "password_too_short": "كلمة المرور قصيرة جدًا",
+  "password_weak": "كلمة المرور ضعيفة",
+
+  "please_select_role": "يرجى اختيار الدور"
+
 
 
 

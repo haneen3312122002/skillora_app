@@ -11,7 +11,7 @@ import 'package:notes_tasks/core/shared/widgets/buttons/primary_button.dart';
 import 'package:notes_tasks/core/shared/widgets/texts/app_text_link.dart';
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
 
-import 'package:notes_tasks/modules/auth/presentation/viewmodels/firebase/reset_password_viewmodel.dart';
+import 'package:notes_tasks/modules/auth/presentation/viewmodels/reset_password_viewmodel.dart';
 import 'package:notes_tasks/modules/auth/domain/failures/auth_failure.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {

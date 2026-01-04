@@ -14,7 +14,8 @@ import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/shared/widgets/fields/app_dropdown.dart';
 
 import 'package:notes_tasks/modules/auth/domain/failures/auth_failure.dart';
-import 'package:notes_tasks/modules/auth/presentation/viewmodels/firebase/register_viewmodel.dart';
+import 'package:notes_tasks/modules/auth/domain/validators/auth_validators.dart';
+import 'package:notes_tasks/modules/auth/presentation/viewmodels/register_viewmodel.dart';
 import 'package:notes_tasks/modules/auth/presentation/providers/register_role_provider.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -34,42 +35,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     UserRole.freelancer,
   ];
 
-  @override
-  void dispose() {
-    nameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submitRegister() async {
-    final registerState = ref.read(registerViewModelProvider);
-    if (registerState.isLoading) return;
-
-    FocusScope.of(context).unfocus();
-
-    final role = ref.read(selectedRoleProvider);
-    if (role == null) {
-      AppSnackbar.show(
-          type: SnackbarType.error, context, 'please_select_role'.tr());
-      return;
-    }
-
-    await ref.read(registerViewModelProvider.notifier).register(
-          name: nameController.text,
-          email: emailController.text,
-          password: passwordController.text,
-          role: userRoleToString(role),
-        );
-  }
+  late final ProviderSubscription _registerSub;
 
   @override
-  Widget build(BuildContext context) {
-    // ✅ Riverpod simple listener: snackbar + navigation
-    ref.listen<AsyncValue<void>>(registerViewModelProvider, (prev, next) {
+  void initState() {
+    super.initState();
+
+    _registerSub = ref.listenManual(registerViewModelProvider, (prev, next) {
       next.whenOrNull(
         data: (_) {
           if (!mounted) return;
+
+          // prevent re-trigger if user returns to this screen
+          ref.invalidate(registerViewModelProvider);
+
           context.go('/verify-email');
         },
         error: (e, _) {
@@ -80,7 +59,77 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         },
       );
     });
+  }
 
+  @override
+  void dispose() {
+    _registerSub.close();
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  void _showError(String key) {
+    AppSnackbar.show(type: SnackbarType.error, context, key.tr());
+  }
+
+  Future<void> _submitRegister() async {
+    final registerState = ref.read(registerViewModelProvider);
+    if (registerState.isLoading) return;
+
+    FocusScope.of(context).unfocus();
+
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    // ✅ Empty fields validation
+    if (name.isEmpty) {
+      _showError('name_required'); // add this key in translations
+      return;
+    }
+
+    if (email.isEmpty) {
+      _showError('email_required'); // add this key in translations
+      return;
+    }
+
+    if (password.isEmpty) {
+      _showError('password_required'); // add this key in translations
+      return;
+    }
+
+    // ✅ Email/Password rules (use your existing validators)
+    final emailKey = AuthValidators.validateEmail(email);
+    if (emailKey != null) {
+      _showError(emailKey);
+      return;
+    }
+
+    final passKey = AuthValidators.validatePassword(password);
+    if (passKey != null) {
+      _showError(passKey);
+      return;
+    }
+
+    // ✅ Role validation
+    final role = ref.read(selectedRoleProvider);
+    if (role == null) {
+      _showError('please_select_role');
+      return;
+    }
+
+    await ref.read(registerViewModelProvider.notifier).register(
+          name: name,
+          email: email,
+          password: password,
+          role: userRoleToString(role),
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final registerState = ref.watch(registerViewModelProvider);
     final selectedRole = ref.watch(selectedRoleProvider);
 

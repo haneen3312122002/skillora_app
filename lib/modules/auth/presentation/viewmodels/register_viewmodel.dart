@@ -9,7 +9,7 @@ final registerViewModelProvider =
 
 class RegisterViewModel extends AsyncNotifier<void> {
   @override
-  FutureOr<void> build() async {}
+  FutureOr<void> build() async => null;
 
   Future<void> register({
     required String name,

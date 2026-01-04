@@ -14,7 +14,7 @@ import 'package:notes_tasks/core/shared/widgets/buttons/primary_button.dart';
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
 
 import 'package:notes_tasks/modules/auth/domain/failures/auth_failure.dart';
-import 'package:notes_tasks/modules/auth/presentation/viewmodels/firebase/login_firebase_viewmodel.dart';
+import 'package:notes_tasks/modules/auth/presentation/viewmodels/login_firebase_viewmodel.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
