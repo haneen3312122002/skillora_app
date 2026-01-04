@@ -29,14 +29,39 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   late final TextEditingController _search;
 
+  late final ProviderSubscription _profileSub;
+
   @override
   void initState() {
     super.initState();
     _search = TextEditingController();
+
+    // ✅ Move side-effects out of build
+    _profileSub = ref.listenManual(profileStreamProvider, (prev, next) {
+      next.whenOrNull(
+        data: (profile) {
+          final vm = ref.read(homeBootstrapViewModelProvider.notifier);
+
+          // ✅ logout/guest
+          if (profile == null) {
+            vm.reset();
+            return;
+          }
+
+          // ✅ run bootstrap once per session/user (handled in VM)
+          vm.bootstrap(
+            profile: profile,
+            onChat: _goToChat,
+            onProposal: _goToProposal,
+          );
+        },
+      );
+    });
   }
 
   @override
   void dispose() {
+    _profileSub.close();
     _search.dispose();
     super.dispose();
   }
@@ -66,22 +91,13 @@ class _HomePageState extends ConsumerState<HomePage> {
       useSafearea: false,
       body: profileAsync.when(
         data: (profile) {
+          // ✅ Rendering only (no ref.read side effects here)
           if (profile == null) {
-            // ✅ logout/guest
-            ref.read(homeBootstrapViewModelProvider.notifier).reset();
-
             return Padding(
               padding: EdgeInsets.all(AppSpacing.spaceMD),
               child: const EmptyView(),
             );
           }
-
-          // ✅ Bootstrap (side-effect) moved out of UI
-          ref.read(homeBootstrapViewModelProvider.notifier).bootstrap(
-                profile: profile,
-                onChat: _goToChat,
-                onProposal: _goToProposal,
-              );
 
           final subtitle = 'hello_name'.tr(namedArgs: {'name': profile.name});
 
