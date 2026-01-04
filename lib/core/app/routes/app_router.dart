@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -47,47 +48,74 @@ import 'package:notes_tasks/modules/settings/presentation/screens/settings_scree
 import 'package:notes_tasks/modules/users/presentation/features/user_details/screens/user_section_details_view.dart';
 import 'package:notes_tasks/modules/users/presentation/features/user_details/user_section_details_args.dart';
 
-// ✅ Helpers live in a separate file, but still part of the same library.
+/// ✅ IMPORTANT:
+/// Keys must be top-level so they are created once only.
+final GlobalKey<NavigatorState> _rootNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'root');
+
+final GlobalKey<NavigatorState> _clientShellNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'clientShell');
+
+final GlobalKey<NavigatorState> _freelancerShellNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'freelancerShell');
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authAsync = ref.watch(authStateProvider);
   final roleAsync = ref.watch(userRoleProvider);
 
   return GoRouter(
+    navigatorKey: _rootNavigatorKey,
     initialLocation: AppRoutes.loading,
     routes: [
+      // ===========================================================
+      // CORE / LOADING
+      // ===========================================================
       GoRoute(
         path: AppRoutes.loading,
         builder: (_, __) => const LoadingIndicator(withBackground: true),
       ),
 
-      // Auth
+      // ===========================================================
+      // AUTH
+      // ===========================================================
       GoRoute(path: AppRoutes.login, builder: (_, __) => const LoginScreen()),
       GoRoute(
-          path: AppRoutes.register, builder: (_, __) => const RegisterScreen()),
+        path: AppRoutes.register,
+        builder: (_, __) => const RegisterScreen(),
+      ),
       GoRoute(
-          path: AppRoutes.resetPassword,
-          builder: (_, __) => const ResetPasswordScreen()),
+        path: AppRoutes.resetPassword,
+        builder: (_, __) => const ResetPasswordScreen(),
+      ),
       GoRoute(
-          path: AppRoutes.verifyEmail,
-          builder: (_, __) => const VerifyEmailScreen()),
+        path: AppRoutes.verifyEmail,
+        builder: (_, __) => const VerifyEmailScreen(),
+      ),
 
-      // Settings (outside shell)
+      // ===========================================================
+      // SETTINGS (outside shell)
+      // ===========================================================
       GoRoute(
-          path: AppRoutes.settings,
-          name: 'settings',
-          builder: (_, __) => const SettingsScreen()),
+        path: AppRoutes.settings,
+        name: 'settings',
+        builder: (_, __) => const SettingsScreen(),
+      ),
       GoRoute(
-          path: AppRoutes.changePassword,
-          builder: (_, __) => const ChangePasswordScreen()),
+        path: AppRoutes.changePassword,
+        builder: (_, __) => const ChangePasswordScreen(),
+      ),
 
-      // Shared / details
+      // ===========================================================
+      // SHARED / DETAILS (outside shell)
+      // ===========================================================
       GoRoute(
         path: AppRoutes.jobsByCategory,
         builder: (context, state) {
           final args = state.extra as JobsByCategoryArgs;
           return JobsByCategoryPage(
-              category: args.category, titleLabel: args.titleLabel);
+            category: args.category,
+            titleLabel: args.titleLabel,
+          );
         },
       ),
       GoRoute(
@@ -125,7 +153,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, state) {
           final args = state.extra as UserSectionDetailsArgs;
           return UserSectionDetailsView(
-              title: args.title, provider: args.provider, mapper: args.mapper);
+            title: args.title,
+            provider: args.provider,
+            mapper: args.mapper,
+          );
         },
       ),
 
@@ -138,44 +169,66 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
 
-      // Shells
+      // ===========================================================
+      // CLIENT SHELL
+      // ===========================================================
       ShellRoute(
+        navigatorKey: _clientShellNavigatorKey,
         builder: (_, __, child) => ClientShell(child: child),
         routes: [
           GoRoute(
-              path: AppRoutes.clientHome, builder: (_, __) => const HomePage()),
+            path: AppRoutes.clientHome,
+            builder: (_, __) => const HomePage(),
+          ),
           GoRoute(
-              path: AppRoutes.clientNotifications,
-              builder: (_, __) => const NotificationsPage()),
+            path: AppRoutes.clientNotifications,
+            builder: (_, __) => const NotificationsPage(),
+          ),
           GoRoute(
-              path: AppRoutes.clientChats,
-              builder: (_, __) => const ChatsListScreen()),
+            path: AppRoutes.clientChats,
+            builder: (_, __) => const ChatsListScreen(),
+          ),
           GoRoute(
-              path: AppRoutes.clientProfile,
-              builder: (_, __) => const ProfileScreen()),
+            path: AppRoutes.clientProfile,
+            builder: (_, __) => const ProfileScreen(),
+          ),
         ],
       ),
+
+      // ===========================================================
+      // FREELANCER SHELL
+      // ===========================================================
       ShellRoute(
+        navigatorKey: _freelancerShellNavigatorKey,
         builder: (_, __, child) => FreelancerShell(child: child),
         routes: [
           GoRoute(
-              path: AppRoutes.freelanceHome,
-              builder: (_, __) => const HomePage()),
+            path: AppRoutes.freelanceHome,
+            builder: (_, __) => const HomePage(),
+          ),
           GoRoute(
-              path: AppRoutes.freelancerNotifications,
-              builder: (_, __) => const NotificationsPage()),
+            path: AppRoutes.freelancerNotifications,
+            builder: (_, __) => const NotificationsPage(),
+          ),
           GoRoute(
-              path: AppRoutes.freelancerProposals,
-              builder: (_, __) => const FreelancerProposalsListPage()),
+            path: AppRoutes.freelancerProposals,
+            builder: (_, __) => const FreelancerProposalsListPage(),
+          ),
           GoRoute(
-              path: AppRoutes.freelancerChats,
-              builder: (_, __) => const ChatsListScreen()),
+            path: AppRoutes.freelancerChats,
+            builder: (_, __) => const ChatsListScreen(),
+          ),
           GoRoute(
-              path: AppRoutes.freelancerProfile,
-              builder: (_, __) => const ProfileScreen()),
+            path: AppRoutes.freelancerProfile,
+            builder: (_, __) => const ProfileScreen(),
+          ),
         ],
       ),
     ],
+
+    // ===========================================================
+    // REDIRECT
+    // ===========================================================
     redirect: (context, state) {
       final loc = state.uri.path;
 
@@ -211,7 +264,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
       // 5) If we are on verify screen but user is verified now -> go home.
       if (user.emailVerified && isVerifyEmailRoute(loc)) {
-        return homeForRole(role);
+        final target = homeForRole(role);
+        return (loc == target) ? null : target;
       }
 
       // 6) Logged-in user should not hang around on auth/loading/root.
@@ -220,13 +274,17 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           (loc == '/' && !isResetPasswordRoute(loc));
 
       if (shouldKickToHome) {
-        return homeForRole(role);
+        final target = homeForRole(role);
+        return (loc == target) ? null : target;
       }
 
       // 7) Shell protection per role (details pages are allowed outside the shell).
       if (!allowOutsideShell(loc)) {
         final okForRole = isRoleShellPath(role, loc);
-        if (!okForRole) return homeForRole(role);
+        if (!okForRole) {
+          final target = homeForRole(role);
+          return (loc == target) ? null : target;
+        }
       }
 
       return null;

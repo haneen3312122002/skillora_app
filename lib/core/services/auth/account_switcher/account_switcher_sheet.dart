@@ -70,15 +70,19 @@ class AccountSwitcherSheet extends ConsumerWidget {
                           color: Theme.of(context).hintColor,
                         ),
                         onTap: () {
-                          if (context.mounted) Navigator.pop(context);
+                          // خدي router قبل ما تسكري الشيت
+                          final router = GoRouter.of(context);
 
-                          // ✅ فتح login بوضع switch حتى لو المستخدم مسجل دخول
-                          if (context.mounted) {
-                            context.go(
+                          // سكري الشيت (يفضل rootNavigator)
+                          Navigator.of(context, rootNavigator: true).pop();
+
+                          // بعد ما ينغلق الشيت، اعملي navigate باستخدام router (بدون context)
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            router.go(
                               '${AppRoutes.login}?switch=1',
                               extra: {'prefillEmail': a.email},
                             );
-                          }
+                          });
                         },
                       ),
                     ),
@@ -95,13 +99,16 @@ class AccountSwitcherSheet extends ConsumerWidget {
               title: 'Log out',
               subtitle: 'Sign out from this device',
               onTap: () async {
-                if (context.mounted) Navigator.pop(context);
+                if (!context.mounted) return;
+
+                context.pop();
 
                 await auth.logout();
 
-                if (context.mounted) {
-                  context.go(AppRoutes.login); // ✅ بدون switch
-                }
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!context.mounted) return;
+                  context.go(AppRoutes.login);
+                });
               },
             ),
           ),
