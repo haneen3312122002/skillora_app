@@ -28,9 +28,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final passwordController = TextEditingController();
 
   bool _didPrefill = false;
+  late final ProviderSubscription _loginSub;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // ✅ Side-effects only (snackbar + navigation)
+    _loginSub = ref.listenManual(firebaseLoginVMProvider, (prev, next) {
+      next.whenOrNull(
+        data: (_) {
+          if (!mounted) return;
+
+          // Optional: avoid re-trigger if user comes back to login screen
+          ref.invalidate(firebaseLoginVMProvider);
+
+          context.go('/');
+        },
+        error: (e, _) {
+          if (!mounted) return;
+          final key =
+              (e is AuthFailure) ? e.messageKey : 'something_went_wrong';
+          AppSnackbar.show(type: SnackbarType.error, context, key.tr());
+        },
+      );
+    });
+  }
 
   @override
   void dispose() {
+    _loginSub.close();
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
@@ -63,22 +90,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     _prefillEmailIfAny(context);
-
-    // ✅ Riverpod way: react to state changes (no effects)
-    ref.listen<AsyncValue<void>>(firebaseLoginVMProvider, (prev, next) {
-      next.whenOrNull(
-        data: (_) {
-          if (!mounted) return;
-          context.go('/');
-        },
-        error: (e, _) {
-          if (!mounted) return;
-          final key =
-              (e is AuthFailure) ? e.messageKey : 'something_went_wrong';
-          AppSnackbar.show(type: SnackbarType.error, context, key.tr());
-        },
-      );
-    });
 
     final loginState = ref.watch(firebaseLoginVMProvider);
 

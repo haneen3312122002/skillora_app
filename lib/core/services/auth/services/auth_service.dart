@@ -55,6 +55,8 @@ class AuthService {
     return auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
+  String? getCurrentUid() => auth.currentUser?.uid;
+
   Future<void> _removeCurrentTokenFromUid(String uid) async {
     final token = await FirebaseMessaging.instance.getToken();
     if (token == null) return;
