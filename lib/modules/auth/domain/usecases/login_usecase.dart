@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:notes_tasks/core/data/remote/firebase/providers/firebase_providers.dart';
-import 'package:notes_tasks/core/services/auth/services/auth_service.dart';
-import 'package:notes_tasks/core/services/auth/mappers/firebase_auth_failure_mapper.dart';
+import 'package:notes_tasks/core/services/auth/auth_service.dart';
+import 'package:notes_tasks/modules/auth/data/mappers/firebase_auth_failure_mapper.dart';
 
 import 'package:notes_tasks/modules/auth/domain/failures/auth_failure.dart';
 import 'package:notes_tasks/modules/auth/domain/validators/auth_validators.dart';

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:notes_tasks/core/services/auth/mappers/firebase_auth_failure_mapper.dart';
+import 'package:notes_tasks/modules/auth/data/mappers/firebase_auth_failure_mapper.dart';
 import 'package:notes_tasks/modules/auth/domain/failures/auth_failure.dart';
 import 'package:notes_tasks/modules/auth/domain/usecases/login_usecase.dart';
 import 'package:notes_tasks/modules/auth/domain/usecases/logout_usecase.dart';

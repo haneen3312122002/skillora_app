@@ -6,7 +6,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:notes_tasks/core/data/remote/firebase/providers/firebase_providers.dart';
-import 'package:notes_tasks/core/services/auth/services/auth_service.dart';
+import 'package:notes_tasks/core/services/auth/auth_service.dart';
 
 final watchEmailVerifiedUseCaseProvider =
     Provider<WatchEmailVerifiedUseCase>((ref) {

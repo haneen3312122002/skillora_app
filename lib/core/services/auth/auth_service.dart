@@ -2,6 +2,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:notes_tasks/core/session/providers/user_role_provider.dart';
+import 'package:notes_tasks/core/shared/enums/role.dart';
 
 class AuthService {
   final fb.FirebaseAuth auth;
@@ -65,6 +67,15 @@ class AuthService {
       'fcmTokens': FieldValue.arrayRemove([token]),
       'updatedAt': FieldValue.serverTimestamp(),
     });
+  }
+
+  Future<UserRole> fetchCurrentUserRole() async {
+    final user = auth.currentUser;
+    if (user == null) return UserRole.client;
+
+    final doc = await db.collection('users').doc(user.uid).get();
+    final rawRole = doc.data()?['role'] as String?;
+    return parseUserRole(rawRole);
   }
 
   Future<void> _addCurrentTokenToUid(String uid) async {

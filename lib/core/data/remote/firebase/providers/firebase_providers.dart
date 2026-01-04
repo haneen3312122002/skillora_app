@@ -4,7 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:notes_tasks/core/services/auth/services/auth_service.dart';
+import 'package:notes_tasks/core/services/auth/auth_service.dart';
 
 // Firebase instances (single source of truth)
 final firebaseAuthProvider =
