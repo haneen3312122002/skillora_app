@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:notes_tasks/core/session/providers/current_user_provider.dart';
 
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/shared/widgets/animation/chat/chat_input_bar.dart';
@@ -94,7 +95,7 @@ class _ChatDetailsScreenState extends ConsumerState<ChatDetailsScreen> {
     final messagesAsync = ref.watch(chatMessagesStreamProvider(widget.chatId));
     final sending = ref.watch(chatActionsViewModelProvider).isLoading;
 
-    final currentUserId = ref.read(firebaseAuthProvider).currentUser?.uid;
+    final currentUserId = ref.watch(currentUserIdProvider);
 
     return AppScaffold(
       scrollable: false,

@@ -6,6 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:notes_tasks/core/data/remote/firebase/providers/firebase_providers.dart';
 
 final currentUserEmailProvider = Provider<String>((ref) {
-  final auth = ref.read(firebaseAuthProvider);
+  final auth = ref.watch(firebaseAuthProvider);
   return auth.currentUser?.email ?? '';
 });
