@@ -1,12 +1,7 @@
-import 'dart:typed_data';
-
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:easy_localization/easy_localization.dart';
 
-import 'package:notes_tasks/core/shared/providers/local_image_storage_provider.dart';
-import 'package:notes_tasks/core/shared/widgets/common/app_snackbar.dart';
 import 'package:notes_tasks/core/shared/providers/image_picker_provider.dart';
+import 'package:notes_tasks/core/shared/providers/local_image_storage_provider.dart';
 
 final profileHeaderActionsViewModelProvider =
     Provider<ProfileHeaderActionsViewModel>((ref) {
@@ -15,34 +10,35 @@ final profileHeaderActionsViewModelProvider =
 
 class ProfileHeaderActionsViewModel {
   final Ref _ref;
-
   ProfileHeaderActionsViewModel(this._ref);
 
-  Future<void> changeAvatar(BuildContext context, {required String uid}) async {
+  Future<String?> changeAvatar({required String uid}) async {
     final picker = _ref.read(imagePickerServiceProvider);
-    final Uint8List? bytes = await picker.pickFromGallery(imageQuality: 80);
-    if (bytes == null) return;
+    final bytes = await picker.pickFromGallery(imageQuality: 80);
+    if (bytes == null) return 'cancelled';
 
-    await _ref.read(localImageStorageProvider.notifier).saveAvatar(
-          uid: uid,
-          bytes: bytes,
-        );
-
-    if (!context.mounted) return;
-    AppSnackbar.show(context, 'profile_image_updated'.tr());
+    try {
+      await _ref
+          .read(localImageStorageProvider.notifier)
+          .saveAvatar(uid: uid, bytes: bytes);
+      return null;
+    } catch (_) {
+      return 'failed_with_error';
+    }
   }
 
-  Future<void> changeCover(BuildContext context, {required String uid}) async {
+  Future<String?> changeCover({required String uid}) async {
     final picker = _ref.read(imagePickerServiceProvider);
-    final Uint8List? bytes = await picker.pickFromGallery(imageQuality: 80);
-    if (bytes == null) return;
+    final bytes = await picker.pickFromGallery(imageQuality: 80);
+    if (bytes == null) return 'cancelled';
 
-    await _ref.read(localImageStorageProvider.notifier).saveCover(
-          uid: uid,
-          bytes: bytes,
-        );
-
-    if (!context.mounted) return;
-    AppSnackbar.show(context, 'cover_image_updated'.tr());
+    try {
+      await _ref
+          .read(localImageStorageProvider.notifier)
+          .saveCover(uid: uid, bytes: bytes);
+      return null;
+    } catch (_) {
+      return 'failed_with_error';
+    }
   }
 }

@@ -35,30 +35,20 @@ class UploadCoverImageViewModel extends AsyncNotifier<Uint8List?> {
     return localState.coverFor(_uid);
   }
 
-  Future<bool> submit(
-    BuildContext context, {
-    required Uint8List bytes,
-  }) async {
-    if (state.isLoading) return false;
-
+  Future<String?> submit({required Uint8List bytes}) async {
+    if (state.isLoading) return 'something_went_wrong';
     state = const AsyncLoading();
 
     try {
-      // نخزن الكفر الخاص بهذا الـ uid
       await ref
           .read(localImageStorageProvider.notifier)
           .saveCover(uid: _uid, bytes: bytes);
 
       state = AsyncData(bytes);
-      AppSnackbar.show(context, 'cover_image_updated'.tr());
-      return true;
+      return null;
     } catch (e, st) {
       state = AsyncError(e, st);
-      AppSnackbar.show(
-        context,
-        'failed_with_error'.tr(namedArgs: {'error': e.toString()}),
-      );
-      return false;
+      return 'failed_with_error';
     }
   }
 }

@@ -34,30 +34,20 @@ class UploadProfileImageViewModel extends AsyncNotifier<Uint8List?> {
     return localState.avatarFor(_uid);
   }
 
-  Future<bool> submit(
-    BuildContext context, {
-    required Uint8List bytes,
-  }) async {
-    if (state.isLoading) return false;
-
+  Future<String?> submit({required Uint8List bytes}) async {
+    if (state.isLoading) return 'something_went_wrong';
     state = const AsyncLoading();
 
     try {
-      // نخزن الأفاتار للـ uid هذا فقط
       await ref
           .read(localImageStorageProvider.notifier)
           .saveAvatar(uid: _uid, bytes: bytes);
 
       state = AsyncData(bytes);
-      AppSnackbar.show(context, 'profile_image_updated'.tr());
-      return true;
+      return null;
     } catch (e, st) {
       state = AsyncError(e, st);
-      AppSnackbar.show(
-        context,
-        'failed_with_error'.tr(namedArgs: {'error': e.toString()}),
-      );
-      return false;
+      return 'failed_with_error';
     }
   }
 }
