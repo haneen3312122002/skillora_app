@@ -8,11 +8,13 @@ import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/shared/enums/page_mode.dart';
 import 'package:notes_tasks/core/shared/widgets/cards/app_card.dart';
 import 'package:notes_tasks/core/shared/widgets/common/app_scaffold.dart';
+import 'package:notes_tasks/core/shared/widgets/common/app_snackbar.dart';
 import 'package:notes_tasks/core/shared/widgets/common/loading_indicator.dart';
 import 'package:notes_tasks/core/shared/widgets/common/empty_view.dart';
 import 'package:notes_tasks/core/shared/widgets/common/error_view.dart';
 import 'package:notes_tasks/core/shared/widgets/lists/app_infinite_list.dart';
 import 'package:notes_tasks/core/shared/widgets/lists/app_list_tile.dart';
+import 'package:notes_tasks/modules/notifications/domain/failures/notifications_failure.dart';
 import 'package:notes_tasks/modules/notifications/presentation/viewmodels/notifications_actions_viewmodel.dart';
 
 import 'package:notes_tasks/modules/propsal/presentation/screens/proposal_details_page.dart';
@@ -24,6 +26,21 @@ class NotificationsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // ✅ UI side-effects only
+    ref.listen(notificationsActionsViewModelProvider, (prev, next) {
+      next.whenOrNull(
+        error: (e, _) {
+          final key = (e is NotificationsFailure)
+              ? e.messageKey
+              : 'something_went_wrong';
+          AppSnackbar.show(context, key.tr());
+        },
+      );
+    });
+
+    final actionsAsync = ref.watch(notificationsActionsViewModelProvider);
+    final actionsVm = ref.read(notificationsActionsViewModelProvider.notifier);
+
     final async = ref.watch(notificationsStreamProvider);
 
     return AppScaffold(
@@ -43,6 +60,8 @@ class NotificationsPage extends ConsumerWidget {
             padding: const EdgeInsets.all(12),
             animateItems: true,
             itemBuilder: (context, n, index) {
+              final isBusy = actionsAsync.isLoading;
+
               return Padding(
                 padding: EdgeInsets.all(AppSpacing.spaceXS),
                 child: AppCard(
@@ -57,23 +76,25 @@ class NotificationsPage extends ConsumerWidget {
                     ),
                     trailing:
                         n.read ? null : const Icon(Icons.circle, size: 10),
-                    onTap: () async {
-                      await ref
-                          .read(notificationsActionsViewModelProvider.notifier)
-                          .markAsRead(n.id);
+                    onTap: isBusy
+                        ? null
+                        : () {
+                            // ✅ fire-and-forget, UI doesn't await
+                            actionsVm.markAsRead(n.id);
 
-                      if (n.type == 'proposal_status' && n.refId != null) {
-                        context.push(
-                          AppRoutes.proposalDetails,
-                          extra: ProposalDetailsArgs(
-                            proposalId: n.refId!,
-                            mode: PageMode.view,
-                          ),
-                        );
-                      }
+                            if (n.type == 'proposal_status' &&
+                                n.refId != null) {
+                              context.push(
+                                AppRoutes.proposalDetails,
+                                extra: ProposalDetailsArgs(
+                                  proposalId: n.refId!,
+                                  mode: PageMode.view,
+                                ),
+                              );
+                            }
 
-                      // TODO: map other types (job_created/chat_message)
-                    },
+                            // TODO: map other types (job_created/chat_message)
+                          },
                   ),
                 ),
               );
