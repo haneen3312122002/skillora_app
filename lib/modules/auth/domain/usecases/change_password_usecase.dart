@@ -1,26 +1,27 @@
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:notes_tasks/core/data/remote/firebase/providers/firebase_providers.dart';
+import 'package:notes_tasks/core/services/auth/services/auth_service.dart';
+import 'package:notes_tasks/core/services/auth/mappers/firebase_auth_failure_mapper.dart';
+
 import 'package:notes_tasks/modules/auth/domain/failures/auth_failure.dart';
-import 'package:notes_tasks/modules/auth/domain/mappers/auth_failure_mapper.dart';
 import 'package:notes_tasks/modules/auth/domain/validators/auth_validators.dart';
 
 final changePasswordUseCaseProvider = Provider<ChangePasswordUseCase>((ref) {
-  final auth = ref.read(firebaseAuthProvider);
-  return ChangePasswordUseCase(auth);
+  final authService = ref.read(authServiceProvider);
+  return ChangePasswordUseCase(authService);
 });
 
 class ChangePasswordUseCase {
-  final fb.FirebaseAuth _auth;
-  ChangePasswordUseCase(this._auth);
+  final AuthService _authService;
+  ChangePasswordUseCase(this._authService);
 
   Future<void> call({required String currentPassword}) async {
     final passKey = AuthValidators.validatePassword(currentPassword);
     if (passKey != null) throw AuthFailure(passKey);
 
-    final user = _auth.currentUser;
+    final user = _authService.auth.currentUser;
     if (user == null) throw const AuthFailure('not_authenticated');
 
     final email = user.email;
@@ -29,27 +30,25 @@ class ChangePasswordUseCase {
     }
 
     try {
-      final credential = fb.EmailAuthProvider.credential(
-        email: email,
-        password: currentPassword.trim(),
-      );
-
-      await user
-          .reauthenticateWithCredential(credential)
+      await _authService
+          .reauthenticateWithCurrentPassword(currentPassword: currentPassword)
           .timeout(const Duration(seconds: 20));
 
-      await _auth
+      await _authService
           .sendPasswordResetEmail(email: email)
           .timeout(const Duration(seconds: 20));
-    } on fb.FirebaseAuthException catch (e) {
-      // هنا بدك رسالة “wrong_current_password” بدل “wrong_password”
-      if (e.code == 'wrong-password') {
-        throw const AuthFailure('wrong_current_password');
-      }
-      throw mapFirebaseAuthExceptionToFailure(e);
     } on TimeoutException {
       throw const AuthFailure('request_timeout');
-    } catch (_) {
+    } catch (e) {
+      // wrong-current-password: Firebase يبعث wrong-password عادة
+      final failure = mapFirebaseExceptionToAuthFailure(e as Object);
+      if (failure != null) {
+        if (failure.messageKey == 'wrong_password') {
+          throw const AuthFailure('wrong_current_password');
+        }
+        throw failure;
+      }
+
       throw const AuthFailure('something_went_wrong');
     }
   }

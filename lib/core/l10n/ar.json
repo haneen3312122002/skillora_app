@@ -34,7 +34,6 @@
   "email": "البريد الإلكتروني",
   "name": "الاسم",
   "register": "إنشاء حساب",
-  "something_went_wrong": "حدث خطأ ما. حاول مرة أخرى.",
   "create_account": "إنشاء حساب",
   "back_to_login": "العودة لتسجيل الدخول",
   "verify_email_title": "تأكيد البريد الإلكتروني",
@@ -110,7 +109,6 @@
   "bio_empty_hint": "اكتب نبذة قصيرة عن نفسك وخبراتك.",
   "bio_updated_success": "تم تحديث النبذة التعريفية بنجاح.",
 
-  "field_required": "هذا الحقل مطلوب",
 
   "experience_title_label": "المسمى الوظيفي",
   "experience_company_label": "الشركة",
@@ -149,7 +147,7 @@
   "project_tools_empty_hint": "أضف الأدوات التي استخدمتها في هذا المشروع.",
   "project_add_button": "إضافة مشروع",
   "project_save_changes": "حفظ التغييرات",
-
+"reset_email_sent_generic": "إذا كان البريد الإلكتروني مسجّلًا لدينا، ستصلك رسالة لإعادة تعيين كلمة المرور",
   "skills_edit_empty_hint": "أضف مهارة واحدة على الأقل.",
   "skills_new_label": "مهارة جديدة",
   "skills_new_hint": "مثال: Flutter، تصميم واجهات...",
@@ -200,6 +198,74 @@
   "common_add": "إضافة",
   "common_save": "حفظ",
   "common_edit": "تعديل"
+  ,
+  "hello": "مرحباً",
+  "hello_name": "مرحباً {name}",
+  "home_title": "الرئيسية",
+  "home_client_title": "رئيسية العميل",
+  "home_admin_title": "لوحة المدير",
+  "home_freelancer_title": "جاهزة للإنجاز؟ خلّينا نبدأ ✨",
+  "search": "بحث",
+  "profile_client_ok": "أنت داخل كعميل ✅",
+  "profile_admin_ok": "أنت داخل كمدير ✅"
+,
+  "all_categories": "جميع التصنيفات",
+  "see_all": "عرض الكل",
+  "recent_jobs": "أحدث الوظائف",
+  "no_jobs_yet": "لا توجد وظائف بعد"
+
+,
+  "jobs": "الوظائف",
+  "open": "مفتوحة",
+  "previous": "سابقة"
+
+,
+  "notifications": "الإشعارات"
+
+,
+  "proposal_details_title": "تفاصيل العرض",
+  "proposal_not_found": "العرض غير موجود",
+  "proposal_message": "رسالة العرض",
+
+  "accept": "قبول",
+  "reject": "رفض",
+
+  "proposal_section_job": "الوظيفة",
+  "proposal_section_client": "العميل",
+  "proposal_section_proposal": "العرض",
+
+  "label_title": "العنوان",
+  "label_category": "التصنيف",
+  "label_budget": "الميزانية",
+  "label_deadline": "آخر موعد",
+  "label_name": "الاسم",
+  "label_status": "الحالة",
+  "label_price": "السعر",
+  "label_duration": "المدة",
+  "label_days": "يوم",
+
+  "proposal_status_pending": "قيد المراجعة",
+  "proposal_status_accepted": "مقبول",
+  "proposal_status_rejected": "مرفوض",
+
+  "no_proposals_yet": "لا توجد عروض بعد",
+  "no_proposals": "لا توجد عروض",
+  "loading_freelancer": "جار تحميل بيانات المستقل...",
+  "loading_client": "جار تحميل بيانات العميل...",
+  "loading_job": "جار تحميل بيانات الوظيفة...",
+  "tap_to_view_proposal_details": "اضغط لعرض تفاصيل العرض",
+
+  "proposals_title": "العروض",
+  "my_proposals_title": "عروضي",
+  "too_many_attempts": "محاولات كثيرة، يرجى المحاولة لاحقًا",
+  "auth_failed": "فشلت عملية تسجيل الدخول",
+
+ 
+  "field_required": "هذا الحقل مطلوب",
+  "invalid_input": "البيانات المدخلة غير صحيحة",
+
+  "registration_failed": "فشلت عملية إنشاء الحساب، يرجى المحاولة لاحقًا",
+  "something_went_wrong": "حدث خطأ ما، يرجى المحاولة لاحقًا"
 
 
 

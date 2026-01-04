@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:notes_tasks/core/app/routs/app_routes.dart';
+import 'package:notes_tasks/core/app/routes/app_routes.dart';
 import 'package:notes_tasks/core/shared/widgets/navigation/app_navbar_container.dart';
 import 'package:notes_tasks/core/shared/widgets/navigation/app_navbar.dart';
 

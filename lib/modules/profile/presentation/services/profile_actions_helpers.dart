@@ -3,10 +3,10 @@ import 'dart:typed_data';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:notes_tasks/core/shared/providers/image_picker_provider.dart';
 
 import 'package:notes_tasks/core/shared/providers/local_image_storage_provider.dart';
 import 'package:notes_tasks/core/shared/widgets/common/app_snackbar.dart';
-import 'package:notes_tasks/modules/profile/presentation/providers/image/image_picker_provider.dart';
 
 Future<void> pickAndUploadAvatar(
   BuildContext context,

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:notes_tasks/core/features/job/service/job_provider.dart';
+import 'package:notes_tasks/core/services/job/service/job_provider.dart';
 import 'package:notes_tasks/modules/job/domain/entities/job_entity.dart';
 
 /// ✅ Job by id

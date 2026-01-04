@@ -1,9 +1,8 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'package:notes_tasks/core/features/profile/services/profile_provider.dart';
-import 'package:notes_tasks/core/features/profile/services/profile_service.dart';
+import 'package:notes_tasks/core/services/profile/services/profile_provider.dart';
+import 'package:notes_tasks/core/services/profile/services/profile_service.dart';
 import 'package:notes_tasks/modules/profile/data/models/profile_model.dart';
 import 'package:notes_tasks/modules/profile/domain/entities/profile_entity.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final getProfileStreamUseCaseProvider =
     Provider<GetProfileStreamUseCase>((ref) {
@@ -19,9 +18,7 @@ class GetProfileStreamUseCase {
   Stream<ProfileEntity?> call() {
     return _service.watchProfile().map((doc) {
       if (!doc.exists) return null;
-
-      return ProfileModel.fromDoc(
-          doc); // 👈 استخدم الموديل بدل ما تبني entity يدويًا
+      return ProfileModel.fromDoc(doc);
     });
   }
 }

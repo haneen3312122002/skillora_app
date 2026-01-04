@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:notes_tasks/core/app/routs/app_routes.dart';
+import 'package:notes_tasks/core/app/routes/app_routes.dart';
 import 'package:notes_tasks/core/shared/enums/page_mode.dart';
 import 'package:notes_tasks/core/shared/widgets/common/profile_items_section.dart';
 import 'package:notes_tasks/core/shared/widgets/images/app_cover_images.dart';

@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fb;
 
-import 'package:notes_tasks/core/features/auth/services/auth_service.dart';
 import 'package:notes_tasks/core/data/remote/firebase/providers/firebase_providers.dart';
-import 'package:notes_tasks/core/shared/enums/role.dart';
+import 'package:notes_tasks/core/services/auth/services/auth_service.dart';
+import 'package:notes_tasks/core/services/auth/mappers/firebase_auth_failure_mapper.dart';
+
 import 'package:notes_tasks/modules/auth/domain/failures/auth_failure.dart';
-import 'package:notes_tasks/modules/auth/domain/mappers/auth_failure_mapper.dart';
 import 'package:notes_tasks/modules/auth/domain/validators/auth_validators.dart';
 
 final firebaseRegisterUseCaseProvider =
@@ -48,12 +47,11 @@ class FirebaseRegisterUseCase {
       if (user != null && !user.emailVerified) {
         await user.sendEmailVerification();
       }
-      return;
-    } on fb.FirebaseAuthException catch (e) {
-      throw mapFirebaseAuthExceptionToFailure(e);
     } on TimeoutException {
       throw const AuthFailure('request_timeout');
-    } catch (_) {
+    } catch (e) {
+      final failure = mapFirebaseExceptionToAuthFailure(e as Object);
+      if (failure != null) throw failure;
       throw const AuthFailure('something_went_wrong');
     }
   }

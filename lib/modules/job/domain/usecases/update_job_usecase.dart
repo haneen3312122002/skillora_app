@@ -1,4 +1,4 @@
-import 'package:notes_tasks/core/features/job/service/jobs_service.dart';
+import 'package:notes_tasks/core/services/job/service/jobs_service.dart';
 
 class UpdateJobUseCase {
   final JobsService _service;

@@ -12,7 +12,10 @@ import 'package:notes_tasks/core/shared/widgets/common/error_view.dart';
 import 'package:notes_tasks/core/shared/widgets/common/loading_indicator.dart';
 import 'package:notes_tasks/core/shared/widgets/buttons/primary_button.dart';
 import 'package:notes_tasks/core/shared/widgets/common/app_snackbar.dart';
-import 'package:notes_tasks/core/features/auth/providers/email_verified_stream_provider.dart';
+
+import 'package:notes_tasks/core/session/providers/email_verified_stream_provider.dart';
+import 'package:notes_tasks/modules/auth/domain/failures/auth_failure.dart';
+import 'package:notes_tasks/modules/auth/presentation/viewmodels/verify_email_actions_viewmodel.dart';
 
 class VerifyEmailScreen extends ConsumerStatefulWidget {
   const VerifyEmailScreen({super.key});
@@ -23,6 +26,7 @@ class VerifyEmailScreen extends ConsumerStatefulWidget {
 
 class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
   late final ProviderSubscription _verifiedSub;
+  late final ProviderSubscription _actionsSub;
 
   @override
   void initState() {
@@ -33,11 +37,19 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
         data: (isVerified) {
           if (!isVerified) return;
           if (!mounted) return;
-
-          // ✅ الأفضل من push (ما بدنا نرجع لصفحة التحقق)
           context.go('/');
         },
-        error: (_, __) {},
+      );
+    });
+
+    _actionsSub = ref.listenManual(verifyEmailActionsVMProvider, (prev, next) {
+      next.whenOrNull(
+        error: (e, _) {
+          if (!mounted) return;
+          final key =
+              (e is AuthFailure) ? e.messageKey : 'something_went_wrong';
+          AppSnackbar.show(context, key.tr());
+        },
       );
     });
   }
@@ -45,6 +57,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
   @override
   void dispose() {
     _verifiedSub.close();
+    _actionsSub.close();
     super.dispose();
   }
 
@@ -52,18 +65,18 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
   Widget build(BuildContext context) {
     final verifiedAsync = ref.watch(emailVerifiedStreamProvider);
 
-    final auth = ref.read(firebaseAuthProvider); // read only data
-    final authService = ref.read(authServiceProvider); // actions
+    final auth = ref.read(firebaseAuthProvider); // read only (no actions)
+    final actionsState = ref.watch(verifyEmailActionsVMProvider);
 
     return AppScaffold(
       title: 'verify_email_title'.tr(),
       body: Center(
         child: verifiedAsync.when(
           data: (isVerified) {
-            // ✅ ما في side effect هنا
             if (isVerified) return const SizedBox();
 
             final email = auth.currentUser?.email ?? '';
+
             return Padding(
               padding: EdgeInsets.all(AppSpacing.spaceLG),
               child: Column(
@@ -90,32 +103,31 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                   ),
                   const SizedBox(height: 40),
                   AppPrimaryButton(
+                    variant: AppButtonVariant.outlined,
                     label: 'resend_verification_link'.tr(),
+                    isLoading: actionsState.isLoading,
                     onPressed: () async {
-                      try {
-                        await authService.sendEmailVerification();
-                        if (!mounted) return;
-                        AppSnackbar.show(
-                          context,
-                          'verification_email_sent'.tr(),
-                        );
-                      } catch (e) {
-                        // ✅ لا نعرض raw error للمستخدم
-                        if (!mounted) return;
-                        AppSnackbar.show(
-                          context,
-                          'verification_send_failed'.tr(),
-                        );
-                      }
+                      await ref
+                          .read(verifyEmailActionsVMProvider.notifier)
+                          .resendVerification();
+                      if (!mounted) return;
+
+                      // ✅ Success message (optional)
+                      AppSnackbar.show(
+                        context,
+                        'verification_email_sent'.tr(),
+                      );
                     },
                   ),
                   const SizedBox(height: 16),
                   AppTextLink(
                     textKey: 'back_to_login',
                     onPressed: () async {
-                      await authService.logout();
+                      await ref
+                          .read(verifyEmailActionsVMProvider.notifier)
+                          .logout();
                       if (!mounted) return;
-                      context.go('/login'); // ✅ go أفضل من pushReplacement هنا
+                      context.go('/login');
                     },
                   ),
                 ],

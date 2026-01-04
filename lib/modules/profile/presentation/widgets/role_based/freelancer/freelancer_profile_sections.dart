@@ -6,12 +6,11 @@ import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/app/theme/text_styles.dart';
 
 import 'package:notes_tasks/modules/profile/domain/entities/profile_entity.dart';
+import 'package:notes_tasks/modules/profile_projects/presentation/providers/projects_stream_provider.dart';
+import 'package:notes_tasks/modules/profile_experience/presentation/widgets/experiences_section_container.dart';
 
-import 'package:notes_tasks/modules/profile/presentation/providers/project/projects_provider.dart';
-import 'package:notes_tasks/modules/profile/presentation/widgets/experience/experience_container.dart';
-
-import 'package:notes_tasks/modules/profile/presentation/widgets/project/profile_projects_section.dart';
-import 'package:notes_tasks/modules/profile/presentation/widgets/skills/skill_section_container.dart';
+import 'package:notes_tasks/modules/profile_projects/presentation/widgets/profile_projects_section.dart';
+import 'package:notes_tasks/modules/profile_skills/presentation/widgets/skill_section_container.dart';
 
 class FreelancerProfileSections extends ConsumerWidget {
   final ProfileEntity profile;

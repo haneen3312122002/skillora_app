@@ -1,11 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart'; // ✅ ADD
+import 'package:go_router/go_router.dart';
 
-import 'package:notes_tasks/core/app/routs/app_routes.dart'; // ✅ ADD
+import 'package:notes_tasks/core/app/routes/app_routes.dart';
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
-import 'package:notes_tasks/core/shared/enums/page_mode.dart'; // ✅ ADD
+import 'package:notes_tasks/core/shared/enums/page_mode.dart';
 import 'package:notes_tasks/core/shared/enums/role.dart';
 import 'package:notes_tasks/core/shared/widgets/common/app_scaffold.dart';
 import 'package:notes_tasks/core/shared/widgets/common/empty_view.dart';
@@ -16,9 +16,8 @@ import 'package:notes_tasks/modules/home/presentation/widgets/freelancer_home.da
 import 'package:notes_tasks/modules/home/presentation/widgets/homeshell.dart';
 import 'package:notes_tasks/modules/profile/presentation/providers/profile/get_profile_stream_provider.dart';
 
-// ✅ ADD
-import 'package:notes_tasks/core/features/notifications/notifications_providers.dart';
-import 'package:notes_tasks/modules/propseles/presentation/screens/proposal_details_page.dart'; // ✅ ADD
+import 'package:notes_tasks/modules/home/presentation/viewmodels/home_bootstrap_viewmodel.dart';
+import 'package:notes_tasks/modules/propsal/presentation/screens/proposal_details_page.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -29,9 +28,6 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   late final TextEditingController _search;
-
-  bool _didInitNotifications = false;
-  String? _lastUid; // ✅ ADD: عشان نعرف لو تغيّر اليوزر
 
   @override
   void initState() {
@@ -45,56 +41,20 @@ class _HomePageState extends ConsumerState<HomePage> {
     super.dispose();
   }
 
-  void _resetNotificationsInit() {
-    _didInitNotifications = false;
-    _lastUid = null;
+  void _goToChat(String chatId) {
+    if (!mounted) return;
+    context.push('${AppRoutes.chatDetails}/$chatId');
   }
 
-  void _initNotificationsOnce({
-    required String uid,
-    required UserRole role,
-  }) {
-    if (_lastUid != null && _lastUid != uid) {
-      _didInitNotifications = false;
-    }
-    _lastUid = uid;
-
-    if (_didInitNotifications) return;
-    _didInitNotifications = true;
-
-    // ✅ استدعي مباشرة
-    ref.read(notificationsBootstrapProvider).init(
-          uid: uid,
-          isFreelancer: role == UserRole.freelancer,
-          onTap: (data) {
-            if (!mounted) return;
-
-            final type = (data['type'] ?? '').toString();
-
-            if (type == 'chat_message') {
-              final chatId = (data['chatId'] ?? '').toString();
-              if (chatId.isNotEmpty) {
-                context.push('${AppRoutes.chatDetails}/$chatId');
-              }
-              return;
-            }
-
-            if (type == 'proposal_status') {
-              final proposalId =
-                  (data['proposalId'] ?? data['refId'] ?? '').toString();
-              if (proposalId.isNotEmpty) {
-                context.push(
-                  AppRoutes.proposalDetails,
-                  extra: ProposalDetailsArgs(
-                    proposalId: proposalId,
-                    mode: PageMode.view,
-                  ),
-                );
-              }
-              return;
-            }
-          },
-        );
+  void _goToProposal(String proposalId) {
+    if (!mounted) return;
+    context.push(
+      AppRoutes.proposalDetails,
+      extra: ProposalDetailsArgs(
+        proposalId: proposalId,
+        mode: PageMode.view,
+      ),
+    );
   }
 
   @override
@@ -107,16 +67,21 @@ class _HomePageState extends ConsumerState<HomePage> {
       body: profileAsync.when(
         data: (profile) {
           if (profile == null) {
-            // ✅ لو صار logout/guest
-            _resetNotificationsInit();
-            ref.read(notificationsBootstrapProvider).reset();
+            // ✅ logout/guest
+            ref.read(homeBootstrapViewModelProvider.notifier).reset();
+
             return Padding(
               padding: EdgeInsets.all(AppSpacing.spaceMD),
               child: const EmptyView(),
             );
           }
 
-          _initNotificationsOnce(uid: profile.uid, role: profile.role);
+          // ✅ Bootstrap (side-effect) moved out of UI
+          ref.read(homeBootstrapViewModelProvider.notifier).bootstrap(
+                profile: profile,
+                onChat: _goToChat,
+                onProposal: _goToProposal,
+              );
 
           final subtitle = 'hello_name'.tr(namedArgs: {'name': profile.name});
 

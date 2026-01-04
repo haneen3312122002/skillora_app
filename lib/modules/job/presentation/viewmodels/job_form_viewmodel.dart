@@ -129,19 +129,17 @@ class JobFormViewModel extends AsyncNotifier<JobFormState?> {
     return v;
   }
 
-  Future<bool> submit(BuildContext context) async {
+  // ... نفس الكلاس تبعك، بس عدّلي submit:
+
+  Future<String?> submit() async {
     final cur = state.value;
-    if (cur == null || state.isLoading) return false;
+    if (cur == null || state.isLoading) return 'something_went_wrong';
 
     if (cur.title.trim().isEmpty || cur.description.trim().isEmpty) {
-      AppSnackbar.show(context, 'required'.tr());
-      return false;
+      return 'required';
     }
-
-    // ✅ category required
     if (cur.category.trim().isEmpty) {
-      AppSnackbar.show(context, 'required'.tr());
-      return false;
+      return 'required';
     }
 
     final imageUrl = _sanitizeUrl(cur.imageUrl);
@@ -161,7 +159,7 @@ class JobFormViewModel extends AsyncNotifier<JobFormState?> {
           budget: cur.budget,
           deadline: cur.deadline,
           isOpen: true,
-          category: cur.category.trim(), // ✅
+          category: cur.category.trim(),
         );
       } else {
         await _add(
@@ -172,24 +170,15 @@ class JobFormViewModel extends AsyncNotifier<JobFormState?> {
           jobUrl: jobUrl,
           budget: cur.budget,
           deadline: cur.deadline,
-          category: cur.category.trim(), // ✅
+          category: cur.category.trim(),
         );
       }
 
-      AppSnackbar.show(
-        context,
-        cur.isEdit ? 'common_saved'.tr() : 'common_added'.tr(),
-      );
-
       state = const AsyncData(null);
-      return true;
+      return null; // ✅ success
     } catch (e, st) {
       state = AsyncError(e, st);
-      AppSnackbar.show(
-        context,
-        'failed_with_error'.tr(namedArgs: {'error': e.toString()}),
-      );
-      return false;
+      return 'failed_with_error';
     }
   }
 }

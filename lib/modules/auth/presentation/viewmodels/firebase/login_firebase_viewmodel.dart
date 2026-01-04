@@ -1,22 +1,16 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 
+import 'package:notes_tasks/core/data/remote/firebase/providers/firebase_providers.dart';
+import 'package:notes_tasks/core/services/auth/mappers/firebase_auth_failure_mapper.dart';
 import 'package:notes_tasks/modules/auth/domain/failures/auth_failure.dart';
-import 'package:notes_tasks/modules/auth/domain/mappers/auth_failure_mapper.dart';
 import 'package:notes_tasks/modules/auth/domain/usecases/login_usecase.dart';
 import 'package:notes_tasks/modules/auth/domain/usecases/logout_usecase.dart';
 
-// ✅ ADD: saved accounts
-import 'package:notes_tasks/core/features/auth/account_switcher/saved_accounts_service.dart';
-import 'package:notes_tasks/core/features/auth/account_switcher/saved_accounts_provider.dart';
-
-// ✅ ADD: firestore provider (إذا عندك واحد جاهز استعمليه بدل هذا)
-final firestoreProvider = Provider<FirebaseFirestore>((ref) {
-  return FirebaseFirestore.instance;
-});
+import 'package:notes_tasks/core/services/auth/account_switcher/saved_accounts_service.dart';
+import 'package:notes_tasks/core/services/auth/account_switcher/saved_accounts_provider.dart';
 
 final firebaseLoginVMProvider =
     AsyncNotifierProvider<FirebaseLoginViewModel, void>(
@@ -30,28 +24,51 @@ class FirebaseLoginViewModel extends AsyncNotifier<void> {
     return;
   }
 
-  Future<void> login({required String email, required String password}) async {
+  Future<void> login({
+    required String email,
+    required String password,
+  }) async {
     if (state.isLoading) return;
     state = const AsyncLoading();
 
     try {
       final loginUseCase = ref.read(firebaseLoginUseCaseProvider);
+      await loginUseCase(
+        email: email.trim(),
+        password: password.trim(),
+      );
 
-      // ✅ تنفيذ تسجيل الدخول
-      await loginUseCase(email: email, password: password);
-
-      // ✅ بعد نجاح الدخول: خزني الحساب محليًا
       final uid = fb.FirebaseAuth.instance.currentUser?.uid;
       if (uid != null) {
-        await _saveAccountLocally(uid: uid, email: email);
+        await _saveAccountLocally(uid: uid, email: email.trim());
       }
 
       state = const AsyncData(null);
-    } on fb.FirebaseAuthException catch (e, st) {
-      final failure = mapFirebaseAuthExceptionToFailure(e);
-      state = AsyncError(failure, st);
     } catch (e, st) {
-      state = AsyncError(const AuthFailure('something_went_wrong'), st);
+      final failure = (e is AuthFailure)
+          ? e
+          : mapFirebaseExceptionToAuthFailure(e as Object) ??
+              const AuthFailure('something_went_wrong');
+
+      state = AsyncError(failure, st);
+    }
+  }
+
+  Future<void> logout() async {
+    if (state.isLoading) return;
+    state = const AsyncLoading();
+
+    try {
+      final logoutUseCase = ref.read(logoutUseCaseProvider);
+      await logoutUseCase();
+      state = const AsyncData(null);
+    } catch (e, st) {
+      final failure = (e is AuthFailure)
+          ? e
+          : mapFirebaseExceptionToAuthFailure(e as Object) ??
+              const AuthFailure('something_went_wrong');
+
+      state = AsyncError(failure, st);
     }
   }
 
@@ -60,7 +77,7 @@ class FirebaseLoginViewModel extends AsyncNotifier<void> {
     required String email,
   }) async {
     try {
-      final db = ref.read(firestoreProvider);
+      final db = ref.read(firebaseFirestoreProvider);
 
       final userSnap = await db.collection('users').doc(uid).get();
       final data = userSnap.data() ?? {};
@@ -80,24 +97,9 @@ class FirebaseLoginViewModel extends AsyncNotifier<void> {
         ),
       );
 
-      // ✅ (اختياري) refresh القائمة إذا عندك شاشة بتراقبها
       ref.invalidate(savedAccountsProvider);
     } catch (_) {
-      // ما نخلي حفظ الحساب يفشل تسجيل الدخول
-    }
-  }
-
-  Future<void> logout() async {
-    if (state.isLoading) return;
-    state = const AsyncLoading();
-
-    try {
-      final logoutUseCase = ref.read(logoutUseCaseProvider);
-      await logoutUseCase();
-
-      state = const AsyncData(null);
-    } catch (e, st) {
-      state = AsyncError(const AuthFailure('something_went_wrong'), st);
+      // don't block login if saving account fails
     }
   }
 }

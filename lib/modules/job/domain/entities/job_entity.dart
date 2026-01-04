@@ -1,4 +1,4 @@
-import 'package:notes_tasks/modules/profile/domain/entities/profile_item.dart';
+import 'package:notes_tasks/modules/profile_projects/domain/entities/profile_item.dart';
 
 class JobEntity implements ProfileItem {
   @override

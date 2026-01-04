@@ -1,17 +1,16 @@
 class AuthValidators {
   static String? validateEmail(String email) {
     final v = email.trim();
-    if (v.isEmpty) return 'please_enter_email';
+    if (v.isEmpty) return 'field_required';
     final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-    if (!emailRegex.hasMatch(v)) return 'invalid_email';
+    if (!emailRegex.hasMatch(v)) return 'invalid_input';
     return null;
   }
 
   static String? validatePassword(String password) {
     final v = password.trim();
-    if (v.isEmpty) return 'please_enter_password';
-    // إذا بدك حد أدنى
-    if (v.length < 6) return 'weak_password';
+    if (v.isEmpty) return 'field_required';
+    if (v.length < 6) return 'invalid_input';
     return null;
   }
 }

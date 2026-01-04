@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:notes_tasks/core/shared/constants/job_categories.dart';
 
+import 'package:notes_tasks/core/shared/constants/job_categories.dart';
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
+import 'package:notes_tasks/core/shared/widgets/common/app_snackbar.dart';
 import 'package:notes_tasks/core/shared/widgets/fields/app_dropdown.dart';
 import 'package:notes_tasks/core/shared/widgets/fields/custom_text_field.dart';
 import 'package:notes_tasks/core/shared/widgets/buttons/primary_button.dart';
+
 import 'package:notes_tasks/modules/job/domain/entities/job_entity.dart';
 import 'package:notes_tasks/modules/job/presentation/viewmodels/job_form_viewmodel.dart';
 
@@ -40,7 +42,6 @@ class _JobFormWidgetState extends ConsumerState<JobFormWidget> {
       _jobUrl.text = p.jobUrl ?? '';
       _imageUrl.text = p.imageUrl ?? '';
       _budget.text = p.budget?.toString() ?? '';
-      // category ما إلها controller، بتنحط بالـ VM عبر initForEdit
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -138,10 +139,10 @@ class _JobFormWidgetState extends ConsumerState<JobFormWidget> {
             ),
             SizedBox(height: AppSpacing.spaceMD),
 
-            // ✅ Category dropdown (Riverpod only)
+            // ✅ Category dropdown
             AppDropdown<String>(
-              label: 'Category',
-              hint: 'Select a category',
+              label: 'category'.tr(),
+              hint: 'select_category'.tr(),
               items: JobCategories.ids(),
               value: data.category.isEmpty ? null : data.category,
               onChanged: (v) => vm.setCategory(v ?? ''),
@@ -186,12 +187,20 @@ class _JobFormWidgetState extends ConsumerState<JobFormWidget> {
             SizedBox(height: AppSpacing.spaceLG),
 
             AppPrimaryButton(
+              variant: AppButtonVariant.outlined,
               label: data.isEdit ? 'common_save'.tr() : 'common_add'.tr(),
               isLoading: async.isLoading,
               onPressed: () async {
                 if (!_formKey.currentState!.validate()) return;
-                final ok = await vm.submit(context);
-                if (ok && context.mounted) Navigator.pop(context);
+
+                final errKey = await vm.submit(); // ✅ no context
+                if (errKey != null) {
+                  if (!context.mounted) return;
+                  AppSnackbar.show(context, errKey.tr());
+                  return;
+                }
+
+                if (context.mounted) Navigator.pop(context);
               },
             ),
           ],

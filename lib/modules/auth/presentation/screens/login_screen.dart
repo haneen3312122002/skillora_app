@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:notes_tasks/core/shared/widgets/animation/fade_in.dart';
@@ -15,9 +16,6 @@ import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/modules/auth/domain/failures/auth_failure.dart';
 import 'package:notes_tasks/modules/auth/presentation/viewmodels/firebase/login_firebase_viewmodel.dart';
 
-// ✅ ADD (لو عملتي AccountSwitcherSheet)
-import 'package:notes_tasks/core/features/auth/account_switcher/account_switcher_sheet.dart';
-
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -29,39 +27,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  late final ProviderSubscription _loginSub;
-
-  // ✅ ADD: حتى ما نعمل prefill كل rebuild
   bool _didPrefill = false;
 
   @override
-  void initState() {
-    super.initState();
-
-    _loginSub = ref.listenManual(firebaseLoginVMProvider, (prev, next) {
-      next.whenOrNull(
-        data: (_) {
-          if (!mounted) return;
-          context.go('/');
-        },
-        error: (e, _) {
-          final key =
-              (e is AuthFailure) ? e.messageKey : 'something_went_wrong';
-          AppSnackbar.show(context, key.tr());
-        },
-      );
-    });
-  }
-
-  @override
   void dispose() {
-    _loginSub.close();
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
   }
 
-  /// ✅ ADD: اقرأ prefillEmail من extra مرة وحدة
   void _prefillEmailIfAny(BuildContext context) {
     if (_didPrefill) return;
     _didPrefill = true;
@@ -69,10 +43,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final extra = GoRouterState.of(context).extra;
     if (extra is Map) {
       final v = extra['prefillEmail'];
-      final email = v == null ? '' : v.toString();
-      if (email.isNotEmpty) {
-        emailController.text = email;
-      }
+      final email = v == null ? '' : v.toString().trim();
+      if (email.isNotEmpty) emailController.text = email;
     }
   }
 
@@ -83,89 +55,112 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     FocusScope.of(context).unfocus();
 
     await ref.read(firebaseLoginVMProvider.notifier).login(
-          email: emailController.text.trim(),
-          password: passwordController.text.trim(),
+          email: emailController.text,
+          password: passwordController.text,
         );
-  }
-
-  void _openAccountSwitcher() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (_) => const AccountSwitcherSheet(),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     _prefillEmailIfAny(context);
 
+    // ✅ Riverpod way: react to state changes (no effects)
+    ref.listen<AsyncValue<void>>(firebaseLoginVMProvider, (prev, next) {
+      next.whenOrNull(
+        data: (_) {
+          if (!mounted) return;
+          context.go('/');
+        },
+        error: (e, _) {
+          if (!mounted) return;
+          final key =
+              (e is AuthFailure) ? e.messageKey : 'something_went_wrong';
+          AppSnackbar.show(type: SnackbarType.error, context, key.tr());
+        },
+      );
+    });
+
     final loginState = ref.watch(firebaseLoginVMProvider);
 
     return AppScaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // ✅ زر صغير فوق لتبديل الحسابات (اختياري)
-          Align(
-            alignment: Alignment.centerRight,
-            child: AppTextLink(
-              textKey: 'switch_account', // ضيفي key بالترجمة
-              onPressed: _openAccountSwitcher,
-            ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: AppSpacing.spaceMD,
+            right: AppSpacing.spaceMD,
+            top: AppSpacing.spaceMD,
+            bottom:
+                MediaQuery.of(context).viewInsets.bottom + AppSpacing.spaceLG,
           ),
-          SizedBox(height: AppSpacing.spaceSM),
-
-          FadeIn(
-            child: SlideIn(
-              from: const Offset(0, -20),
-              child: AppCustomTextField(
-                controller: emailController,
-                label: 'email'.tr(),
-                inputAction: TextInputAction.next,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: 250.w,
+                height: 250.h,
+                child: Center(
+                  child: Image.asset(
+                    'assets/logo.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
-            ),
-          ),
-          SizedBox(height: AppSpacing.spaceMD),
-          FadeIn(
-            delay: const Duration(milliseconds: 100),
-            child: SlideIn(
-              from: const Offset(0, -10),
-              child: AppCustomTextField(
-                controller: passwordController,
-                label: 'password'.tr(),
-                obscureText: true,
-                inputAction: TextInputAction.done,
-                onSubmitted: (_) => submitLogin(),
+              SizedBox(height: AppSpacing.spaceSM),
+              FadeIn(
+                child: SlideIn(
+                  from: const Offset(0, -20),
+                  child: AppCustomTextField(
+                    controller: emailController,
+                    label: 'email'.tr(),
+                    inputAction: TextInputAction.next,
+                  ),
+                ),
               ),
-            ),
+              SizedBox(height: AppSpacing.spaceMD),
+              FadeIn(
+                delay: const Duration(milliseconds: 100),
+                child: SlideIn(
+                  from: const Offset(0, -10),
+                  child: AppCustomTextField(
+                    controller: passwordController,
+                    label: 'password'.tr(),
+                    obscureText: true,
+                    inputAction: TextInputAction.done,
+                    onSubmitted: (_) => submitLogin(),
+                  ),
+                ),
+              ),
+              SizedBox(height: AppSpacing.spaceSM),
+              FadeIn(
+                delay: const Duration(milliseconds: 200),
+                child: AppTextLink(
+                  textKey: 'forget_password',
+                  onPressed: () => context.push('/reset-pass'),
+                ),
+              ),
+              SizedBox(height: AppSpacing.spaceLG),
+              FadeIn(
+                delay: const Duration(milliseconds: 250),
+                child: AppPrimaryButton(
+                  variant: AppButtonVariant.primary,
+                  label: 'login'.tr(),
+                  isLoading: loginState.isLoading,
+                  onPressed: submitLogin,
+                ),
+              ),
+              SizedBox(height: AppSpacing.spaceMD),
+              FadeIn(
+                delay: const Duration(milliseconds: 300),
+                child: AppPrimaryButton(
+                  variant: AppButtonVariant.outlined,
+                  label: 'create_account'.tr(),
+                  isLoading: loginState.isLoading,
+                  onPressed: () => context.push('/register'),
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: AppSpacing.spaceSM),
-          FadeIn(
-            delay: const Duration(milliseconds: 200),
-            child: AppTextLink(
-              textKey: 'forget password?',
-              onPressed: () => context.push('/reset-pass'),
-            ),
-          ),
-          SizedBox(height: AppSpacing.spaceLG),
-          FadeIn(
-            delay: const Duration(milliseconds: 250),
-            child: AppPrimaryButton(
-              label: 'login'.tr(),
-              isLoading: loginState.isLoading,
-              onPressed: submitLogin,
-            ),
-          ),
-          SizedBox(height: AppSpacing.spaceLG),
-          Center(
-            child: AppTextLink(
-              textKey: 'create_account',
-              onPressed: () => context.pushReplacement('/register'),
-            ),
-          ),
-        ],
+        ),
       ),
       actions: const [],
     );

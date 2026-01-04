@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:notes_tasks/core/app/routs/app_router.dart';
-import 'package:notes_tasks/core/app/routs/app_routes.dart';
+import 'package:notes_tasks/core/app/routes/app_router.dart';
+import 'package:notes_tasks/core/app/routes/app_routes.dart';
 import 'package:notes_tasks/core/app/theme/app_theme.dart';
 import 'package:notes_tasks/core/app/viewmodels/theme_viewmodel.dart';
 import 'package:notes_tasks/core/data/remote/firebase/firebase_initializer.dart';
@@ -12,7 +12,7 @@ import 'package:notes_tasks/core/data/remote/firebase/providers/firebase_provide
 import 'package:notes_tasks/core/shared/widgets/animation/fade_in.dart';
 import 'package:notes_tasks/core/shared/widgets/animation/slide_in.dart';
 // ✅ Notifications
-import 'package:notes_tasks/core/features/notifications/notifications_providers.dart';
+import 'package:notes_tasks/core/services/notifications/notifications_providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

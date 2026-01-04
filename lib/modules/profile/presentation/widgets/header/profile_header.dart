@@ -1,11 +1,10 @@
-// lib/modules/profile/presentation/widgets/header/profile_header.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:notes_tasks/modules/profile/domain/entities/profile_entity.dart';
 import 'package:notes_tasks/core/shared/providers/local_image_storage_provider.dart';
 import 'package:notes_tasks/core/shared/widgets/header/app_cover_header.dart';
-import 'package:notes_tasks/modules/profile/presentation/services/profile_actions_helpers.dart';
+import 'package:notes_tasks/modules/profile/domain/entities/profile_entity.dart';
+import 'package:notes_tasks/modules/profile/presentation/viewmodels/profile/profile_header_actions_viewmodel.dart';
 
 class ProfileHeader extends ConsumerWidget {
   final ProfileEntity profile;
@@ -15,8 +14,9 @@ class ProfileHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final localImages = ref.watch(localImageStorageProvider);
+    final vm = ref.read(profileHeaderActionsViewModelProvider);
 
-    final uid = profile.uid; // 👈 تأكد إن ProfileEntity فيها uid
+    final uid = profile.uid;
 
     return AppCoverHeader(
       title: profile.name,
@@ -28,12 +28,8 @@ class ProfileHeader extends ConsumerWidget {
       showAvatar: true,
       isCoverLoading: false,
       isAvatarLoading: false,
-      onChangeCover: () {
-        pickAndUploadCover(context, ref, uid: uid);
-      },
-      onChangeAvatar: () {
-        pickAndUploadAvatar(context, ref, uid: uid);
-      },
+      onChangeCover: () => vm.changeCover(context, uid: uid),
+      onChangeAvatar: () => vm.changeAvatar(context, uid: uid),
     );
   }
 }

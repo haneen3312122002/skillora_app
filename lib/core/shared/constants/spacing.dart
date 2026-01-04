@@ -4,6 +4,7 @@ class AppSpacing {
   static final double spaceXS = 4.h;
   static final double homeContainerH = 340.h;
   static final double homeContainerW = 240.h;
+  static final double spaceXXS = 5.h;
 
   static final double spaceSM = 8.h;
 

@@ -12,7 +12,6 @@ class AppForm extends StatelessWidget {
 
   final EdgeInsetsGeometry? padding;
 
-
   final Widget? footer;
 
   const AppForm({
@@ -37,6 +36,7 @@ class AppForm extends StatelessWidget {
             ...fields,
             SizedBox(height: AppSpacing.spaceLG),
             AppPrimaryButton(
+              variant: AppButtonVariant.outlined,
               label: submitLabel,
               isLoading: isLoading,
               onPressed: isLoading

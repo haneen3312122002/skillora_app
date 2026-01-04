@@ -1,18 +1,39 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:notes_tasks/core/services/job/service/job_provider.dart';
+
 import 'package:notes_tasks/modules/job/domain/entities/job_entity.dart';
 import 'package:notes_tasks/modules/job/presentation/providers/job_usecases_providers.dart';
 
-final myJobsStreamProvider = StreamProvider<List<JobEntity>>((ref) {
-  final useCase = ref.watch(watchMyJobsUseCaseProvider);
-  return useCase();
+// ✅ Feed
+final jobsFeedStreamProvider = StreamProvider<List<JobEntity>>((ref) {
+  return ref.watch(watchJobsFeedUseCaseProvider)();
 });
 
-final jobsFeedStreamProvider = StreamProvider<List<JobEntity>>((ref) {
-  final useCase = ref.watch(watchJobsFeedUseCaseProvider);
-  return useCase();
+// ✅ My jobs
+final myJobsStreamProvider = StreamProvider<List<JobEntity>>((ref) {
+  return ref.watch(watchMyJobsUseCaseProvider)();
 });
-final jobsByCategoryStreamProvider =
+
+// ✅ Job by id (خليه من service مباشر عادي)
+final jobByIdStreamProvider =
+    StreamProvider.family<JobEntity?, String>((ref, jobId) {
+  return ref.read(jobsServiceProvider).watchJobById(jobId);
+});
+
+// ✅ Jobs by category open
+final jobsByCategoryOpenStreamProvider =
     StreamProvider.family<List<JobEntity>, String>((ref, category) {
-  final useCase = ref.watch(getJobsByCategoryUseCaseProvider);
-  return useCase(category: category);
+  return ref.read(jobsServiceProvider).watchJobsByCategoryAndOpen(
+        category: category,
+        isOpen: true,
+      );
+});
+
+// ✅ Jobs by category previous/closed
+final jobsByCategoryPreviousStreamProvider =
+    StreamProvider.family<List<JobEntity>, String>((ref, category) {
+  return ref.read(jobsServiceProvider).watchJobsByCategoryAndOpen(
+        category: category,
+        isOpen: false,
+      );
 });

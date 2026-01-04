@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:notes_tasks/core/app/routs/app_routes.dart';
+import 'package:notes_tasks/core/app/routes/app_routes.dart';
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/shared/widgets/common/app_scaffold.dart';
 import 'package:notes_tasks/core/shared/widgets/common/error_view.dart';
@@ -11,8 +11,9 @@ import 'package:notes_tasks/core/shared/widgets/common/empty_view.dart';
 import 'package:notes_tasks/core/shared/widgets/cards/app_card.dart';
 import 'package:notes_tasks/core/shared/widgets/lists/app_infinite_list.dart';
 import 'package:notes_tasks/core/shared/widgets/lists/app_list_tile.dart';
+import 'package:notes_tasks/modules/chat/presentation/providers/chat_stream_providers.dart';
 
-import 'package:notes_tasks/modules/chat/presentation/providers/chat_providers.dart';
+import 'package:notes_tasks/modules/chat/presentation/providers/chat_usecases_providers.dart';
 
 class ChatsListScreen extends ConsumerWidget {
   const ChatsListScreen({super.key});

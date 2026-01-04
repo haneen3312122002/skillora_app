@@ -64,6 +64,7 @@ class _EditFieldDialogContentState extends State<EditFieldDialogContent> {
             ),
             SizedBox(width: AppSpacing.spaceXS),
             AppPrimaryButton(
+              variant: AppButtonVariant.outlined,
               label: 'dialog_save'.tr(),
               isLoading: _isSaving,
               onPressed: _isSaving ? () {} : _handleSave,

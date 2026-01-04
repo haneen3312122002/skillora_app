@@ -59,6 +59,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
           ),
           SizedBox(height: AppSpacing.spaceLG),
           AppPrimaryButton(
+            variant: AppButtonVariant.outlined,
             label: 'send_reset_link'.tr(),
             isLoading: state.isLoading,
             onPressed: () {

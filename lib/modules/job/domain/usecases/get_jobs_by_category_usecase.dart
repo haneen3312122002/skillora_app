@@ -1,11 +1,15 @@
-import 'package:notes_tasks/core/features/job/service/jobs_service.dart';
+import 'package:notes_tasks/core/services/job/service/jobs_service.dart';
 import 'package:notes_tasks/modules/job/domain/entities/job_entity.dart';
 
-class GetJobsByCategoryUseCase {
+class WatchJobsByCategoryUseCase {
   final JobsService _service;
-  GetJobsByCategoryUseCase(this._service);
+  WatchJobsByCategoryUseCase(this._service);
 
-  Stream<List<JobEntity>> call({required String category}) {
-    return _service.watchJobsByCategory(category);
+  Stream<List<JobEntity>> call({
+    required String category,
+    required bool isOpen,
+  }) {
+    return _service.watchJobsByCategoryAndOpen(
+        category: category, isOpen: isOpen);
   }
 }

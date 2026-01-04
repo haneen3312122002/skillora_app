@@ -4,16 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/shared/widgets/animation/chat/chat_input_bar.dart';
-import 'package:notes_tasks/core/shared/widgets/animation/chat/chat_message_bubble.dart';
+import 'package:notes_tasks/core/shared/widgets/animation/chat/chat_messages_list.dart';
 import 'package:notes_tasks/core/shared/widgets/common/app_scaffold.dart';
 import 'package:notes_tasks/core/shared/widgets/common/app_snackbar.dart';
-import 'package:notes_tasks/core/shared/widgets/common/error_view.dart';
-import 'package:notes_tasks/core/shared/widgets/common/empty_view.dart';
 import 'package:notes_tasks/core/data/remote/firebase/providers/firebase_providers.dart';
 
-import 'package:notes_tasks/modules/chat/presentation/providers/chat_providers.dart';
 import 'package:notes_tasks/modules/chat/domain/failures/chat_failure.dart';
+import 'package:notes_tasks/modules/chat/presentation/providers/chat_stream_providers.dart';
 import 'package:notes_tasks/modules/chat/presentation/viewmodels/chat_actions_viewmodel.dart';
+
+// ✅ new reusable list widget (adjust path to your project structure)
 
 class ChatDetailsScreen extends ConsumerStatefulWidget {
   final String chatId;
@@ -27,44 +27,40 @@ class _ChatDetailsScreenState extends ConsumerState<ChatDetailsScreen> {
   final _ctrl = TextEditingController();
   late final ProviderSubscription _chatSub;
 
-  // ✅ optional: scroll controller لتحسين UX
   final ScrollController _scroll = ScrollController();
+
+  void _safeJumpToBottom() {
+    if (!_scroll.hasClients) return;
+    _scroll.animateTo(
+      0,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+    );
+  }
+
+  void _resetInput() {
+    _ctrl.clear();
+    _safeJumpToBottom();
+  }
 
   @override
   void initState() {
     super.initState();
 
+    // ✅ listen only for errors (snackbar)
     _chatSub = ref.listenManual(chatActionsViewModelProvider, (prev, next) {
-      final wasLoading = prev?.isLoading ?? false;
-      final nowSuccess = next.hasValue && !next.isLoading && !next.hasError;
-
-      if (wasLoading && nowSuccess) {
-        if (!mounted) return;
-        _ctrl.clear();
-
-        // ✅ بعد إرسال رسالة: انزل لآخر الشات (reverse=true => offset 0)
-        _safeJumpToBottom();
-      }
-
       next.whenOrNull(
         error: (e, _) {
           if (!mounted) return;
           final key =
               (e is ChatFailure) ? e.messageKey : 'something_went_wrong';
           AppSnackbar.show(context, key.tr());
+
+          // optional: clear sticky error state
+          ref.read(chatActionsViewModelProvider.notifier).reset();
         },
       );
     });
-  }
-
-  void _safeJumpToBottom() {
-    if (!_scroll.hasClients) return;
-    // reverse:true => أحدث الرسائل تحت، والـ offset 0 هو أسفل
-    _scroll.animateTo(
-      0,
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeOut,
-    );
   }
 
   @override
@@ -79,12 +75,18 @@ class _ChatDetailsScreenState extends ConsumerState<ChatDetailsScreen> {
     final text = _ctrl.text.trim();
     if (text.isEmpty) return;
 
-    if (ref.read(chatActionsViewModelProvider).isLoading) return;
+    final vm = ref.read(chatActionsViewModelProvider.notifier);
 
-    await ref.read(chatActionsViewModelProvider.notifier).send(
-          chatId: widget.chatId,
-          text: text,
-        );
+    final ok = await vm.send(
+      chatId: widget.chatId,
+      text: text,
+    );
+
+    if (!mounted) return;
+
+    if (ok) {
+      _resetInput(); // ✅ clear immediately after success
+    }
   }
 
   @override
@@ -100,55 +102,19 @@ class _ChatDetailsScreenState extends ConsumerState<ChatDetailsScreen> {
       body: Column(
         children: [
           Expanded(
-            child: messagesAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, __) => ErrorView(
-                message: 'something_went_wrong'.tr(),
-                fullScreen: false,
-                onRetry: () =>
-                    ref.refresh(chatMessagesStreamProvider(widget.chatId)),
-              ),
-              data: (messages) {
-                if (messages.isEmpty) {
-                  return const EmptyView(
-                    message: null,
-                    icon: Icons.chat_bubble_outline,
-                  );
-                }
+            child: ChatMessagesList(
+              messagesAsync: messagesAsync,
+              controller: _scroll,
+              currentUserId: currentUserId,
+              onRetry: () =>
+                  ref.refresh(chatMessagesStreamProvider(widget.chatId)),
+              somethingWentWrongText: 'something_went_wrong'.tr(),
 
-                // ✅ UX: أحدث الرسائل تحت
-                final list = messages.reversed.toList();
-
-                // ✅ بعد ما تجي رسائل جديدة: انزل للأسفل مرة واحدة (خفيف)
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  _safeJumpToBottom();
-                });
-
-                return ListView.builder(
-                  controller: _scroll,
-                  reverse: true, // ✅ أهم سطر
-                  padding: EdgeInsets.all(AppSpacing.spaceMD),
-                  itemCount: list.length,
-                  itemBuilder: (_, i) {
-                    final m = list[i];
-
-                    final isMe = (currentUserId != null &&
-                        (m.senderId == currentUserId));
-
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: AppSpacing.spaceSM),
-                      child: ChatMessageBubble(
-                        text: m.text,
-                        isMe: isMe,
-                      ),
-                    );
-                  },
-                );
-              },
+              // ✅ adapt to your message model
+              textOf: (m) => m.text,
+              senderIdOf: (m) => m.senderId,
             ),
           ),
-
-          // ✅ مهم عشان الكيبورد
           SafeArea(
             top: false,
             child: Padding(

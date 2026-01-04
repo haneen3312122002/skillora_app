@@ -3,25 +3,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:notes_tasks/core/app/routs/app_routes.dart';
+import 'package:notes_tasks/core/app/routes/app_routes.dart';
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/app/theme/text_styles.dart';
 import 'package:notes_tasks/core/shared/enums/page_mode.dart';
 import 'package:notes_tasks/core/shared/widgets/pages/app_bottom_sheet.dart';
-import 'package:notes_tasks/core/shared/widgets/pages/deatiles_page.dart';
+import 'package:notes_tasks/core/shared/widgets/pages/details_page.dart';
 import 'package:notes_tasks/core/shared/widgets/tags/app_tags_wrap.dart';
-
+import 'package:notes_tasks/core/shared/widgets/common/app_snackbar.dart';
 import 'package:notes_tasks/modules/job/presentation/providers/jobs_byid_stream_providers.dart';
+
 import 'package:notes_tasks/modules/job/presentation/viewmodels/job_cover_image_viewmodel.dart';
 import 'package:notes_tasks/modules/job/presentation/services/job_image_helpers.dart';
-import 'package:notes_tasks/modules/propseles/presentation/providers/proposals_stream_providers.dart';
-import 'package:notes_tasks/modules/propseles/presentation/screens/client/client_job_proposals_section.dart';
 
-import 'package:notes_tasks/modules/propseles/presentation/widgets/proposal_form_widget.dart';
+import 'package:notes_tasks/modules/propsal/presentation/providers/proposals_stream_providers.dart';
+import 'package:notes_tasks/modules/propsal/presentation/screens/client/client_job_proposals_section.dart';
+import 'package:notes_tasks/modules/propsal/presentation/widgets/proposal_form_widget.dart';
 
 import 'package:notes_tasks/modules/job/presentation/viewmodels/job_actions_viewmodel.dart';
+import 'package:notes_tasks/modules/job/domain/failures/job_failure.dart';
 
-// أو إذا بس widget section، خليها بالصفحة الخاصة بالبروبوزالز
+// ----------------------------------------------------
+// Args
+// ----------------------------------------------------
 class JobDetailsArgs {
   final String jobId;
   final PageMode mode;
@@ -29,6 +33,9 @@ class JobDetailsArgs {
   const JobDetailsArgs({required this.jobId, this.mode = PageMode.view});
 }
 
+// ----------------------------------------------------
+// Page
+// ----------------------------------------------------
 class JobDetailsPage extends ConsumerWidget {
   final String jobId;
   final PageMode mode;
@@ -65,12 +72,31 @@ class JobDetailsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // ✅ listen once per build lifecycle (Riverpod handles it safely)
+    ref.listen(jobActionsViewModelProvider, (prev, next) {
+      // error
+      next.whenOrNull(
+        error: (e, _) {
+          final key = (e is JobFailure) ? e.messageKey : 'something_went_wrong';
+          AppSnackbar.show(context, key.tr());
+        },
+        data: (_) {
+          // success (optional)
+          final wasLoading = prev?.isLoading ?? false;
+          if (wasLoading) {
+            AppSnackbar.show(context, 'common_saved'.tr());
+          }
+        },
+      );
+    });
+
     final jobAsync = ref.watch(jobByIdStreamProvider(jobId));
 
     return jobAsync.when(
       loading: () =>
           const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (e, _) => Scaffold(body: Center(child: Text('Error: $e'))),
+      error: (e, _) =>
+          Scaffold(body: Center(child: Text('Error: $e'))), // خليها زي ما عندك
       data: (job) {
         if (job == null) {
           return Scaffold(body: Center(child: Text('job_not_found'.tr())));
@@ -85,11 +111,12 @@ class JobDetailsPage extends ConsumerWidget {
         final localCoverBytes =
             ref.watch(jobCoverImageViewModelProvider(job.id));
 
-        // ✅ toggle open/close state
         final actionAsync = ref.watch(jobActionsViewModelProvider);
         final jobVm = ref.read(jobActionsViewModelProvider.notifier);
         final isToggling = actionAsync.isLoading;
+
         final canApply = _isFreelancer && job.isOpen;
+
         final myProposalAsync =
             ref.watch(myProposalForJobStreamProvider(job.id));
 
@@ -97,6 +124,7 @@ class JobDetailsPage extends ConsumerWidget {
           data: (p) => p != null,
           orElse: () => false,
         );
+
         return AppDetailsPage(
           mode: mode,
           appBarTitleKey: 'job_details_title',
@@ -109,9 +137,13 @@ class JobDetailsPage extends ConsumerWidget {
               ? () => pickAndUploadJobCover(context, ref, jobId: job.id)
               : null,
           onChangeAvatar: null,
-          proposalButtonLabelKey: canApply ? 'Make Proposal' : '',
+
+          // ✅ proposal button
+          proposalButtonLabelKey: canApply
+              ? (alreadyApplied ? 'already_applied' : 'make_proposal')
+              : '',
           proposalButtonIcon: canApply ? Icons.send_outlined : null,
-          onProposalPressed: canApply
+          onProposalPressed: (canApply && !alreadyApplied)
               ? () {
                   showModalBottomSheet(
                     context: context,
@@ -126,6 +158,7 @@ class JobDetailsPage extends ConsumerWidget {
                   );
                 }
               : null,
+
           sections: [
             // ✅ Client controls
             if (_isClient) ...[
@@ -135,17 +168,20 @@ class JobDetailsPage extends ConsumerWidget {
                     child: ElevatedButton.icon(
                       onPressed: isToggling
                           ? null
-                          : () => jobVm.setOpen(context, job, !job.isOpen),
+                          : () => jobVm.setOpen(job, !job.isOpen), // ✅
                       icon: isToggling
                           ? const SizedBox(
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : Icon(job.isOpen
-                              ? Icons.lock_outline
-                              : Icons.lock_open_outlined),
-                      label: Text(job.isOpen ? 'Close Job' : 'Open Job'),
+                          : Icon(
+                              job.isOpen
+                                  ? Icons.lock_outline
+                                  : Icons.lock_open_outlined,
+                            ),
+                      label:
+                          Text(job.isOpen ? 'close_job'.tr() : 'open_job'.tr()),
                     ),
                   ),
                 ],
@@ -159,33 +195,41 @@ class JobDetailsPage extends ConsumerWidget {
                   );
                 },
                 icon: const Icon(Icons.list_alt),
-                label: Text('View Proposals'.tr()),
+                label: Text('view_proposals'.tr()),
               ),
               SizedBox(height: AppSpacing.spaceLG),
             ],
 
-            if (hasCategory) _infoBlock(title: 'Category', value: job.category),
-            _infoBlock(title: 'Status', value: job.isOpen ? 'Open' : 'Closed'),
+            if (hasCategory)
+              _infoBlock(title: 'category'.tr(), value: job.category),
+            _infoBlock(
+              title: 'status'.tr(),
+              value: job.isOpen ? 'open'.tr() : 'closed'.tr(),
+            ),
             if (hasBudget)
               _infoBlock(
-                  title: 'Budget', value: job.budget!.toStringAsFixed(0)),
-            _infoBlock(title: 'Deadline', value: _fmtDate(job.deadline)),
+                title: 'budget'.tr(),
+                value: job.budget!.toStringAsFixed(0),
+              ),
+            _infoBlock(title: 'deadline'.tr(), value: _fmtDate(job.deadline)),
             if (hasJobUrl)
-              _infoBlock(title: 'Job URL', value: job.jobUrl!.trim()),
+              _infoBlock(title: 'job_url'.tr(), value: job.jobUrl!.trim()),
 
             if (hasDesc) ...[
-              Text('job_description_title'.tr(),
-                  style:
-                      AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)),
+              Text(
+                'job_description_title'.tr(),
+                style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+              ),
               SizedBox(height: AppSpacing.spaceSM),
               Text(job.description, style: AppTextStyles.body),
             ],
 
             if (hasSkills) ...[
               SizedBox(height: AppSpacing.spaceLG),
-              Text('job_skills_label'.tr(),
-                  style:
-                      AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)),
+              Text(
+                'job_skills_label'.tr(),
+                style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+              ),
               SizedBox(height: AppSpacing.spaceSM),
               AppTagsWrap(tags: job.skills),
             ],

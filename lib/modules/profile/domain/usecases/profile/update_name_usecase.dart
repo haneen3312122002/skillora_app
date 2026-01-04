@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:notes_tasks/core/features/profile/services/profile_provider.dart';
-import 'package:notes_tasks/core/features/profile/services/profile_service.dart';
+import 'package:notes_tasks/core/services/profile/services/profile_provider.dart';
+import 'package:notes_tasks/core/services/profile/services/profile_service.dart';
 
 final updateNameUseCaseProvider = Provider<UpdateNameUseCase>((ref) {
   final service = ref.read(profileServiceProvider);

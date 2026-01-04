@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:notes_tasks/core/shared/enums/role.dart';
@@ -28,18 +29,44 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  late final ProviderSubscription _registerSub;
-
   final List<UserRole> _roles = const [
     UserRole.client,
     UserRole.freelancer,
   ];
 
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
-    _registerSub = ref.listenManual(registerViewModelProvider, (prev, next) {
+  Future<void> _submitRegister() async {
+    final registerState = ref.read(registerViewModelProvider);
+    if (registerState.isLoading) return;
+
+    FocusScope.of(context).unfocus();
+
+    final role = ref.read(selectedRoleProvider);
+    if (role == null) {
+      AppSnackbar.show(
+          type: SnackbarType.error, context, 'please_select_role'.tr());
+      return;
+    }
+
+    await ref.read(registerViewModelProvider.notifier).register(
+          name: nameController.text,
+          email: emailController.text,
+          password: passwordController.text,
+          role: userRoleToString(role),
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // ✅ Riverpod simple listener: snackbar + navigation
+    ref.listen<AsyncValue<void>>(registerViewModelProvider, (prev, next) {
       next.whenOrNull(
         data: (_) {
           if (!mounted) return;
@@ -49,26 +76,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           if (!mounted) return;
           final key =
               (e is AuthFailure) ? e.messageKey : 'something_went_wrong';
-          AppSnackbar.show(context, key.tr());
+          AppSnackbar.show(type: SnackbarType.error, context, key.tr());
         },
       );
     });
-  }
 
-  @override
-  void dispose() {
-    _registerSub.close();
-    nameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     final registerState = ref.watch(registerViewModelProvider);
-    final registerNotifier = ref.read(registerViewModelProvider.notifier);
-
     final selectedRole = ref.watch(selectedRoleProvider);
 
     return AppScaffold(
@@ -76,6 +89,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          SizedBox(
+            width: 250.w,
+            height: 250.h,
+            child: Center(
+              child: Image.asset('assets/logo.png', fit: BoxFit.contain),
+            ),
+          ),
+          SizedBox(height: AppSpacing.spaceSM),
           AppCustomTextField(
             controller: nameController,
             label: 'name'.tr(),
@@ -93,6 +114,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             label: 'password'.tr(),
             obscureText: true,
             inputAction: TextInputAction.done,
+            onSubmitted: (_) => _submitRegister(),
           ),
           SizedBox(height: AppSpacing.spaceMD),
           AppDropdown<UserRole>(
@@ -109,25 +131,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           SizedBox(height: AppSpacing.spaceLG),
           AppPrimaryButton(
+            variant: AppButtonVariant.outlined,
             label: 'register'.tr(),
             isLoading: registerState.isLoading,
-            onPressed: () async {
-              if (registerState.isLoading) return;
-
-              final role = ref.read(selectedRoleProvider);
-              if (role == null) {
-                AppSnackbar.show(context, 'please_select_role'.tr());
-                return;
-              }
-
-              await registerNotifier.register(
-                name: nameController.text.trim(),
-                email: emailController.text.trim(),
-                password: passwordController.text.trim(),
-                // ✅ هيك ما بتخربي شي: Firestore يستقبل String
-                role: userRoleToString(role),
-              );
-            },
+            onPressed: _submitRegister,
           ),
           SizedBox(height: AppSpacing.spaceLG),
           Center(

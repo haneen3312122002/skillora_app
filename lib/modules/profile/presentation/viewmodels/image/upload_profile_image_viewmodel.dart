@@ -8,7 +8,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 import 'package:notes_tasks/core/shared/widgets/common/app_snackbar.dart';
 import 'package:notes_tasks/core/shared/providers/local_image_storage_provider.dart';
-import 'package:notes_tasks/core/features/profile/services/profile_provider.dart';
+import 'package:notes_tasks/core/services/profile/services/profile_provider.dart';
 
 final uploadProfileImageViewModelProvider =
     AsyncNotifierProvider<UploadProfileImageViewModel, Uint8List?>(
@@ -22,7 +22,7 @@ class UploadProfileImageViewModel extends AsyncNotifier<Uint8List?> {
   FutureOr<Uint8List?> build() {
     // نجيب اليوزر الحالي
     final profileService = ref.read(profileServiceProvider);
-    final user = profileService.currentUser;
+    final user = profileService.auth.currentUser;
     if (user == null) {
       return null;
     }

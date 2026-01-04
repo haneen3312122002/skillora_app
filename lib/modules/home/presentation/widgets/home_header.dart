@@ -144,7 +144,7 @@ class _HeaderBody extends StatelessWidget {
                 ),
             ],
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 9.h),
           Padding(
             padding: EdgeInsets.only(left: 16.w, right: 16.w),
             child: LayoutBuilder(
@@ -157,7 +157,7 @@ class _HeaderBody extends StatelessWidget {
                   style: AppTextStyles.title.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
-                    fontSize: constraints.maxWidth < 320 ? 35.sp : 45.sp,
+                    fontSize: constraints.maxWidth < 320 ? 25.sp : 35.sp,
                     height: 1.1,
                   ),
                 );

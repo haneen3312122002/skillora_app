@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../domain/entities/app_notification_entity.dart';
+import 'package:notes_tasks/modules/notifications/domain/entities/app_notification_entity.dart';
 
 class AppNotificationModel extends AppNotificationEntity {
   const AppNotificationModel({
@@ -13,7 +13,8 @@ class AppNotificationModel extends AppNotificationEntity {
   });
 
   factory AppNotificationModel.fromDoc(
-      DocumentSnapshot<Map<String, dynamic>> doc) {
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
     final data = doc.data() ?? {};
     return AppNotificationModel(
       id: doc.id,

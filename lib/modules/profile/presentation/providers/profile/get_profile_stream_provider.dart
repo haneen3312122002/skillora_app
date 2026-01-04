@@ -4,5 +4,5 @@ import 'package:notes_tasks/modules/profile/domain/usecases/profile/get_profile_
 
 final profileStreamProvider = StreamProvider<ProfileEntity?>((ref) {
   final useCase = ref.watch(getProfileStreamUseCaseProvider);
-  return useCase(); // call()
+  return useCase();
 });

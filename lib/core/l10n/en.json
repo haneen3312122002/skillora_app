@@ -13,6 +13,12 @@
   "no_tasks": "No tasks yet",
   "failed_load_tasks": "Failed to load tasks",
 
+  "too_many_attempts": "Too many attempts. Please try again later",
+  "auth_failed": "Authentication failed",
+
+
+  "invalid_input": "Invalid input",
+
   "user_details": "User Details",
   "address_info": "Address Info",
   "bank_info": "Bank Info",
@@ -34,7 +40,6 @@
   "email": "Email",
   "name": "Name",
   "register": "Register",
-  "something_went_wrong": "Something went wrong. Please try again.",
   "create_account": "Create account",
   "back_to_login": "Back to login",
   "verify_email_title": "Verify Email",
@@ -110,7 +115,6 @@
   "bio_empty_hint": "Write a short bio about yourself and your experience.",
   "bio_updated_success": "Bio updated successfully.",
 
-  "field_required": "This field is required.",
 
   "experience_title_label": "Job title",
   "experience_company_label": "Company",
@@ -197,8 +201,72 @@
   "common_add": "Add",
   "common_save": "Save",
   "common_edit": "Edit"
+,
+  "hello": "Hello",
+  "hello_name": "Hello {name}",
+  "home_title": "Home",
+  "home_client_title": "Client Home",
+  "home_admin_title": "Admin Dashboard",
+  "home_freelancer_title": "Ready to get things done? Let’s go ✨",
+  "search": "Search",
+  "profile_client_ok": "You are logged in as a client ✅",
+  "profile_admin_ok": "You are logged in as an admin ✅"
+,
+  "all_categories": "All categories",
+  "see_all": "See all",
+  "recent_jobs": "Recent jobs",
+  "no_jobs_yet": "No jobs yet"
 
+,
+  "jobs": "Jobs",
+  "open": "Open",
+  "previous": "Previous"
 
+,
+  "notifications": "Notifications"
+,
+  "proposal_details_title": "Proposal details",
+  "proposal_not_found": "Proposal not found",
+  "proposal_message": "Proposal message",
 
+  "accept": "Accept",
+  "reject": "Reject",
+
+  "proposal_section_job": "Job",
+  "proposal_section_client": "Client",
+  "proposal_section_proposal": "Proposal",
+
+  "label_title": "Title",
+  "label_category": "Category",
+  "label_budget": "Budget",
+  "label_deadline": "Deadline",
+  "label_name": "Name",
+  "label_status": "Status",
+  "label_price": "Price",
+  "label_duration": "Duration",
+  "label_days": "days",
+
+  "proposal_status_pending": "Pending",
+  "proposal_status_accepted": "Accepted",
+  "proposal_status_rejected": "Rejected",
+
+  "no_proposals_yet": "No proposals yet",
+  "no_proposals": "No proposals",
+  "loading_freelancer": "Loading freelancer...",
+  "loading_client": "Loading client...",
+  "loading_job": "Loading job...",
+  "tap_to_view_proposal_details": "Tap to view proposal details",
+
+  "proposals_title": "Proposals",
+  "my_proposals_title": "My proposals",
+
+  "field_required": "This field is required",
+
+  "something_went_wrong": "Something went wrong. Please try again later",
+
+  "registration_failed": "Registration failed. Please try again later",
+  "please_select_role": "Please select a role",
+
+ "reset_email_sent_generic": "If the email is registered, you will receive a password reset link"
 
 }

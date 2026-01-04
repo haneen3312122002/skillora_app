@@ -95,6 +95,7 @@ class _AppTextEditPageState extends State<AppTextEditPage> {
             ),
             SizedBox(height: AppSpacing.spaceLG),
             AppPrimaryButton(
+              variant: AppButtonVariant.outlined,
               label: _isSubmitting ? 'saving'.tr() : widget.buttonLabel,
               onPressed: _handleSubmit,
               isLoading: _isSubmitting,

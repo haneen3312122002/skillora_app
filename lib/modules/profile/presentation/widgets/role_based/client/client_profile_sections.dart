@@ -7,9 +7,9 @@ import 'package:notes_tasks/modules/profile/domain/entities/profile_entity.dart'
 
 import 'package:notes_tasks/modules/job/presentation/providers/jobs_stream_providers.dart';
 
-import 'package:notes_tasks/modules/profile/presentation/providers/experience/get_experiences_stream_provider.dart';
-import 'package:notes_tasks/modules/profile/presentation/widgets/experience/profile_experience_section.dart';
-import 'package:notes_tasks/modules/profile/presentation/widgets/experience/experience_form_widget.dart';
+import 'package:notes_tasks/modules/profile_experience/presentation/providers/experiences_stream_provider.dart';
+import 'package:notes_tasks/modules/profile_experience/presentation/widgets/profile_experience_section.dart';
+import 'package:notes_tasks/modules/profile_experience/presentation/widgets/experience_form_widget.dart';
 
 class ClientProfileSections extends ConsumerWidget {
   final ProfileEntity profile;

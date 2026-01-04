@@ -1,4 +1,4 @@
-import 'package:notes_tasks/core/features/job/service/jobs_service.dart';
+import 'package:notes_tasks/core/services/job/service/jobs_service.dart';
 import 'package:notes_tasks/modules/job/domain/entities/job_entity.dart';
 
 class WatchJobsFeedUseCase {

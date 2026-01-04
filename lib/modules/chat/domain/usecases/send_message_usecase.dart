@@ -1,4 +1,4 @@
-import 'package:notes_tasks/core/features/chat/chat_dervices.dart';
+import 'package:notes_tasks/core/services/chat/chat_services.dart';
 
 class SendMessageUseCase {
   final ChatsService _service;

@@ -2,46 +2,44 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:notes_tasks/core/app/routs/app_routes.dart';
+
+import 'package:notes_tasks/core/app/routes/app_routes.dart';
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/shared/enums/page_mode.dart';
 import 'package:notes_tasks/core/shared/widgets/cards/app_card.dart';
-
 import 'package:notes_tasks/core/shared/widgets/common/app_scaffold.dart';
 import 'package:notes_tasks/core/shared/widgets/common/loading_indicator.dart';
 import 'package:notes_tasks/core/shared/widgets/common/empty_view.dart';
 import 'package:notes_tasks/core/shared/widgets/common/error_view.dart';
 import 'package:notes_tasks/core/shared/widgets/lists/app_infinite_list.dart';
 import 'package:notes_tasks/core/shared/widgets/lists/app_list_tile.dart';
-import 'package:notes_tasks/modules/propseles/presentation/screens/proposal_details_page.dart';
+import 'package:notes_tasks/modules/notifications/presentation/viewmodels/notifications_actions_viewmodel.dart';
 
-import '../viewmodels/notifications_inbox_viewmodel.dart';
+import 'package:notes_tasks/modules/propsal/presentation/screens/proposal_details_page.dart';
+
+import '../providers/notifications_stream_providers.dart';
 
 class NotificationsPage extends ConsumerWidget {
   const NotificationsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(notificationsInboxViewModelProvider);
+    final async = ref.watch(notificationsStreamProvider);
 
     return AppScaffold(
-      scrollable: false, // ✅ مهم: عشان ما يصير Scroll داخل Scroll
+      scrollable: false,
       extendBodyBehindAppBar: false,
       useSafearea: true,
-      title: 'notifications',
+      title: 'notifications'.tr(),
       body: async.when(
         data: (items) {
           if (items.isEmpty) return const EmptyView();
 
-          // ✅ AppInfiniteList هو الـ scroll الوحيد في الصفحة
           return AppInfiniteList(
             items: items,
-            hasMore: false, // حاليا ما عندنا pagination
-            onLoadMore: () {}, // مطلوب بالويدجت
-            onRefresh: () async {
-              // refresh stream provider
-              ref.invalidate(notificationsInboxViewModelProvider);
-            },
+            hasMore: false,
+            onLoadMore: () {},
+            onRefresh: () async => ref.invalidate(notificationsStreamProvider),
             padding: const EdgeInsets.all(12),
             animateItems: true,
             itemBuilder: (context, n, index) {
@@ -61,41 +59,20 @@ class NotificationsPage extends ConsumerWidget {
                         n.read ? null : const Icon(Icons.circle, size: 10),
                     onTap: () async {
                       await ref
-                          .read(markNotificationReadControllerProvider)
+                          .read(notificationsActionsViewModelProvider.notifier)
                           .markAsRead(n.id);
 
-                      if (n.type == 'proposal_status') {
+                      if (n.type == 'proposal_status' && n.refId != null) {
                         context.push(
                           AppRoutes.proposalDetails,
                           extra: ProposalDetailsArgs(
-                            proposalId: n.refId!, // ✅ مهم جداً
+                            proposalId: n.refId!,
                             mode: PageMode.view,
                           ),
                         );
-                        return;
                       }
 
-                      if (n.type == 'job_created') {
-                        // context.push('${AppRoutes.jobDetails}/${n.refId}');
-                        return;
-                      }
-
-                      if (n.type == 'chat_message') {
-                        // context.push('${AppRoutes.chatDetails}/${n.refId}');
-                        return;
-                      }
-
-                      if (n.type == 'job_created') {
-                        // مثال لو عندك job details route
-                        // context.push('${AppRoutes.jobDetails}/${n.refId}');
-                        return;
-                      }
-
-                      if (n.type == 'chat_message') {
-                        // مثال: refId = chatId (حسب كيف خزنتيها)
-                        // context.push('${AppRoutes.chatDetails}/${n.refId}');
-                        return;
-                      }
+                      // TODO: map other types (job_created/chat_message)
                     },
                   ),
                 ),
@@ -108,7 +85,7 @@ class NotificationsPage extends ConsumerWidget {
         error: (_, __) => ErrorView(
           message: 'something_went_wrong'.tr(),
           fullScreen: false,
-          onRetry: () => ref.refresh(notificationsInboxViewModelProvider),
+          onRetry: () => ref.refresh(notificationsStreamProvider),
         ),
       ),
     );

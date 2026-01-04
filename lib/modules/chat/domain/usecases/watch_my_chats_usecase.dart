@@ -1,4 +1,4 @@
-import 'package:notes_tasks/core/features/chat/chat_dervices.dart';
+import 'package:notes_tasks/core/services/chat/chat_services.dart';
 import 'package:notes_tasks/modules/chat/domain/entities/chat_entity.dart';
 
 class WatchMyChatsUseCase {

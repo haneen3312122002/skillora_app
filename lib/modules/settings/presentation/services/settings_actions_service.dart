@@ -2,7 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:notes_tasks/core/app/routs/app_routes.dart';
+import 'package:notes_tasks/core/app/routes/app_routes.dart';
 
 import 'package:notes_tasks/core/app/viewmodels/theme_viewmodel.dart';
 import 'package:notes_tasks/modules/auth/domain/usecases/logout_usecase.dart';
