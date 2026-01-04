@@ -1,10 +1,14 @@
+// ===============================
+// verify_email_screen.dart
+// ===============================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
+import 'package:notes_tasks/core/session/providers/current_user_email_provider.dart';
+import 'package:notes_tasks/core/session/providers/email_verified_stream_provider.dart';
 
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
-import 'package:notes_tasks/core/data/remote/firebase/providers/firebase_providers.dart';
 import 'package:notes_tasks/core/shared/widgets/buttons/app_icon_button.dart';
 import 'package:notes_tasks/core/shared/widgets/common/app_scaffold.dart';
 import 'package:notes_tasks/core/shared/widgets/texts/app_text_link.dart';
@@ -13,8 +17,8 @@ import 'package:notes_tasks/core/shared/widgets/common/loading_indicator.dart';
 import 'package:notes_tasks/core/shared/widgets/buttons/primary_button.dart';
 import 'package:notes_tasks/core/shared/widgets/common/app_snackbar.dart';
 
-import 'package:notes_tasks/core/session/providers/email_verified_stream_provider.dart';
 import 'package:notes_tasks/modules/auth/domain/failures/auth_failure.dart';
+import 'package:notes_tasks/modules/auth/presentation/viewmodels/email_verified_viewmodel.dart';
 import 'package:notes_tasks/modules/auth/presentation/viewmodels/verify_email_actions_viewmodel.dart';
 
 class VerifyEmailScreen extends ConsumerStatefulWidget {
@@ -32,7 +36,8 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
   void initState() {
     super.initState();
 
-    _verifiedSub = ref.listenManual(emailVerifiedStreamProvider, (prev, next) {
+    // ✅ Side-effect: navigate when verified
+    _verifiedSub = ref.listenManual(emailVerifiedVMProvider, (prev, next) {
       next.whenOrNull(
         data: (isVerified) {
           if (!isVerified) return;
@@ -42,8 +47,18 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
       );
     });
 
+    // ✅ Side-effects: show snackbar on error/success
     _actionsSub = ref.listenManual(verifyEmailActionsVMProvider, (prev, next) {
-      next.whenOrNull(
+      next.when(
+        data: (effect) {
+          if (effect == null) return;
+
+          if (!mounted) return;
+          if (effect is VerifyEmailSuccessEffect) {
+            AppSnackbar.show(context, effect.messageKey.tr());
+          }
+        },
+        loading: () {},
         error: (e, _) {
           if (!mounted) return;
           final key =
@@ -63,9 +78,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final verifiedAsync = ref.watch(emailVerifiedStreamProvider);
-
-    final auth = ref.read(firebaseAuthProvider); // read only (no actions)
+    final verifiedAsync = ref.watch(emailVerifiedVMProvider);
     final actionsState = ref.watch(verifyEmailActionsVMProvider);
 
     return AppScaffold(
@@ -75,7 +88,8 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
           data: (isVerified) {
             if (isVerified) return const SizedBox();
 
-            final email = auth.currentUser?.email ?? '';
+            // ✅ UI reads email from VM/provider (no Firebase direct access)
+            final email = ref.watch(currentUserEmailProvider);
 
             return Padding(
               padding: EdgeInsets.all(AppSpacing.spaceLG),
@@ -106,18 +120,9 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                     variant: AppButtonVariant.outlined,
                     label: 'resend_verification_link'.tr(),
                     isLoading: actionsState.isLoading,
-                    onPressed: () async {
-                      await ref
-                          .read(verifyEmailActionsVMProvider.notifier)
-                          .resendVerification();
-                      if (!mounted) return;
-
-                      // ✅ Success message (optional)
-                      AppSnackbar.show(
-                        context,
-                        'verification_email_sent'.tr(),
-                      );
-                    },
+                    onPressed: () => ref
+                        .read(verifyEmailActionsVMProvider.notifier)
+                        .resendVerification(),
                   ),
                   const SizedBox(height: 16),
                   AppTextLink(
@@ -126,6 +131,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                       await ref
                           .read(verifyEmailActionsVMProvider.notifier)
                           .logout();
+
                       if (!mounted) return;
                       context.go('/login');
                     },
@@ -138,7 +144,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
           error: (_, __) => ErrorView(
             message: 'something_went_wrong'.tr(),
             fullScreen: false,
-            onRetry: () => ref.refresh(emailVerifiedStreamProvider),
+            onRetry: () => ref.invalidate(emailVerifiedVMProvider),
           ),
         ),
       ),

@@ -267,6 +267,10 @@
   "registration_failed": "Registration failed. Please try again later",
   "please_select_role": "Please select a role",
 
- "reset_email_sent_generic": "If the email is registered, you will receive a password reset link"
+ "reset_email_sent_generic": "If the email is registered, you will receive a password reset link",
+ 
+  "operation_failed": "Operation failed. Please try again.",
+  "operation_done": "Done successfully."
+
 
 }

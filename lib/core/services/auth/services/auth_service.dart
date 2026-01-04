@@ -39,6 +39,13 @@ class AuthService {
     return cred;
   }
 
+// داخل AuthService
+  Future<void> reloadCurrentUser() async {
+    final user = auth.currentUser;
+    if (user == null) return;
+    await user.reload();
+  }
+
   Future<fb.UserCredential> login({
     required String email,
     required String password,

@@ -4,17 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/shared/widgets/buttons/primary_button.dart';
+import 'package:notes_tasks/core/shared/widgets/common/app_snackbar.dart';
 import 'package:notes_tasks/core/shared/widgets/fields/custom_text_field.dart';
 
 import 'package:notes_tasks/modules/propsal/domain/entities/proposal_entity.dart';
+import 'package:notes_tasks/modules/propsal/domain/failures/proposal_failure.dart';
 import 'package:notes_tasks/modules/propsal/presentation/viewmodels/proposal_form_viewmodel.dart';
 
 class ProposalFormWidget extends ConsumerStatefulWidget {
-  /// ✅ required for create
   final String jobId;
   final String clientId;
-
-  /// ✅ if not null => edit mode
   final ProposalEntity? initial;
 
   const ProposalFormWidget({
@@ -47,7 +46,6 @@ class _ProposalFormWidgetState extends ConsumerState<ProposalFormWidget> {
       _price.text = p.price?.toString() ?? '';
       _duration.text = p.durationDays?.toString() ?? '';
     } else {
-      // ✅ default title (optional)
       _title.text = 'Proposal';
     }
 
@@ -79,6 +77,18 @@ class _ProposalFormWidgetState extends ConsumerState<ProposalFormWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ snackbar on errors (UI-side)
+    ref.listen(proposalFormViewModelProvider, (prev, next) {
+      next.whenOrNull(
+        error: (e, _) {
+          final key =
+              (e is ProposalFailure) ? e.messageKey : 'something_went_wrong';
+          AppSnackbar.show(context, key.tr());
+          ref.read(proposalFormViewModelProvider.notifier).reset();
+        },
+      );
+    });
+
     final async = ref.watch(proposalFormViewModelProvider);
     final vm = ref.read(proposalFormViewModelProvider.notifier);
 
@@ -102,7 +112,6 @@ class _ProposalFormWidgetState extends ConsumerState<ProposalFormWidget> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // ✅ Title
             AppCustomTextField(
               controller: _title,
               label: 'proposal_title_label'.tr(),
@@ -111,8 +120,6 @@ class _ProposalFormWidgetState extends ConsumerState<ProposalFormWidget> {
                   (v == null || v.trim().isEmpty) ? 'required'.tr() : null,
             ),
             SizedBox(height: AppSpacing.spaceMD),
-
-            // ✅ Cover letter
             AppCustomTextField(
               controller: _cover,
               label: 'proposal_cover_letter_label'.tr(),
@@ -122,8 +129,6 @@ class _ProposalFormWidgetState extends ConsumerState<ProposalFormWidget> {
                   (v == null || v.trim().isEmpty) ? 'required'.tr() : null,
             ),
             SizedBox(height: AppSpacing.spaceMD),
-
-            // ✅ Price + Duration
             Row(
               children: [
                 Expanded(
@@ -145,21 +150,22 @@ class _ProposalFormWidgetState extends ConsumerState<ProposalFormWidget> {
                 ),
               ],
             ),
-
             SizedBox(height: AppSpacing.spaceLG),
-
             AppPrimaryButton(
               variant: AppButtonVariant.outlined,
               label: data.isEdit ? 'common_save'.tr() : 'common_add'.tr(),
               isLoading: async.isLoading,
               onPressed: () async {
+                FocusScope.of(context).unfocus();
+
                 if (!_formKey.currentState!.validate()) return;
 
-                final id = await vm.submit(context);
-                if (!context.mounted) return;
+                final id = await vm.submit(); // ✅ no context
+                if (!mounted) return;
 
                 if (id != null) {
-                  Navigator.pop(context, id); // ✅ رجّع proposalId
+                  AppSnackbar.show(context, 'operation_done'.tr());
+                  Navigator.pop(context, id);
                 }
               },
             ),

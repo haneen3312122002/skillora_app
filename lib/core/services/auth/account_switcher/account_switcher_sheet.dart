@@ -57,35 +57,6 @@ class AccountSwitcherSheet extends ConsumerWidget {
                 children: filtered.map((a) {
                   return Padding(
                     padding: EdgeInsets.only(bottom: AppSpacing.spaceSM),
-                    child: AppCard(
-                      animate: false,
-                      child: AppListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.person_outline),
-                        ),
-                        title: a.name.isNotEmpty ? a.name : a.email,
-                        subtitle: '${a.email} • ${a.role}',
-                        trailing: Icon(
-                          Icons.chevron_right,
-                          color: Theme.of(context).hintColor,
-                        ),
-                        onTap: () {
-                          // خدي router قبل ما تسكري الشيت
-                          final router = GoRouter.of(context);
-
-                          // سكري الشيت (يفضل rootNavigator)
-                          Navigator.of(context, rootNavigator: true).pop();
-
-                          // بعد ما ينغلق الشيت، اعملي navigate باستخدام router (بدون context)
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            router.go(
-                              '${AppRoutes.login}?switch=1',
-                              extra: {'prefillEmail': a.email},
-                            );
-                          });
-                        },
-                      ),
-                    ),
                   );
                 }).toList(),
               );

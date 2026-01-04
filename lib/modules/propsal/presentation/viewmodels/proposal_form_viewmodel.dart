@@ -1,11 +1,8 @@
 import 'dart:async';
-
-import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:notes_tasks/core/shared/widgets/common/app_snackbar.dart';
 import 'package:notes_tasks/modules/propsal/domain/entities/proposal_entity.dart';
+import 'package:notes_tasks/modules/propsal/domain/failures/proposal_failure.dart';
 import 'package:notes_tasks/modules/propsal/presentation/providers/proposal_usecases_providers.dart';
 
 final proposalFormViewModelProvider =
@@ -19,7 +16,7 @@ class ProposalFormState {
   final String jobId;
   final String clientId;
 
-  final String title; // ✅ required for add usecase
+  final String title;
   final String coverLetter;
   final double? price;
   final int? durationDays;
@@ -59,7 +56,7 @@ class ProposalFormState {
 
 class ProposalFormViewModel extends AsyncNotifier<ProposalFormState?> {
   late final _add = ref.read(addProposalUseCaseProvider);
-  late final _update = ref.read(updateProposalUseCaseProvider); // ✅ صح
+  late final _update = ref.read(updateProposalUseCaseProvider);
 
   @override
   FutureOr<ProposalFormState?> build() async => null;
@@ -71,8 +68,8 @@ class ProposalFormViewModel extends AsyncNotifier<ProposalFormState?> {
   }) {
     state = AsyncData(
       ProposalFormState(
-        jobId: jobId,
-        clientId: clientId,
+        jobId: jobId.trim(),
+        clientId: clientId.trim(),
         title: (defaultTitle ?? 'Proposal').trim(),
       ),
     );
@@ -100,23 +97,25 @@ class ProposalFormViewModel extends AsyncNotifier<ProposalFormState?> {
   void _set(ProposalFormState Function(ProposalFormState s) fn) {
     final cur = state.value;
     if (cur == null) return;
+    if (state.isLoading) return; // avoid editing while submitting
     state = AsyncData(fn(cur));
   }
 
-  Future<String?> submit(BuildContext context) async {
+  /// ✅ UI will show snackbar using listener
+  /// Returns proposalId if success
+  Future<String?> submit() async {
     final cur = state.value;
     if (cur == null || state.isLoading) return null;
 
+    // ===== Validate (general & safe messages) =====
     if (cur.jobId.trim().isEmpty || cur.clientId.trim().isEmpty) {
-      AppSnackbar.show(
-        context,
-        'failed_with_error'.tr(namedArgs: {'error': 'missing_job_or_client'}),
-      );
+      state = AsyncError(
+          const ProposalFailure('operation_failed'), StackTrace.empty);
       return null;
     }
 
     if (cur.title.trim().isEmpty || cur.coverLetter.trim().isEmpty) {
-      AppSnackbar.show(context, 'required'.tr());
+      state = AsyncError(const ProposalFailure('required'), StackTrace.empty);
       return null;
     }
 
@@ -132,30 +131,30 @@ class ProposalFormViewModel extends AsyncNotifier<ProposalFormState?> {
           durationDays: cur.durationDays,
         );
 
-        AppSnackbar.show(context, 'common_saved'.tr());
         state = const AsyncData(null);
         return cur.id;
       } else {
         final id = await _add(
-          jobId: cur.jobId,
-          clientId: cur.clientId,
+          jobId: cur.jobId.trim(),
+          clientId: cur.clientId.trim(),
           title: cur.title.trim(),
           coverLetter: cur.coverLetter.trim(),
           price: cur.price,
           durationDays: cur.durationDays,
         );
 
-        AppSnackbar.show(context, 'common_added'.tr());
         state = const AsyncData(null);
         return id;
       }
     } catch (e, st) {
-      state = AsyncError(e, st);
-      AppSnackbar.show(
-        context,
-        'failed_with_error'.tr(namedArgs: {'error': e.toString()}),
-      );
+      // ✅ NEVER leak backend error details to UI
+      state = AsyncError(const ProposalFailure('operation_failed'), st);
       return null;
     }
+  }
+
+  void reset() {
+    if (state.isLoading) return;
+    state = const AsyncData(null);
   }
 }

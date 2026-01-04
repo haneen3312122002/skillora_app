@@ -4,18 +4,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:notes_tasks/core/app/routes/app_routes.dart';
-import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/app/theme/text_styles.dart';
+import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/shared/enums/page_mode.dart';
 import 'package:notes_tasks/core/shared/widgets/cards/app_card.dart';
+import 'package:notes_tasks/core/shared/widgets/common/app_snackbar.dart';
 import 'package:notes_tasks/core/shared/widgets/lists/app_infinite_list.dart';
 
 import 'package:notes_tasks/modules/profile/presentation/providers/profile/users_stream_provider.dart';
-import 'package:notes_tasks/modules/propsal/presentation/viewmodels/proposal_actions_viewmodel.dart';
+
 import 'package:notes_tasks/modules/propsal/domain/entities/proposal_entity.dart';
 import 'package:notes_tasks/modules/propsal/domain/entities/proposal_status.dart';
+import 'package:notes_tasks/modules/propsal/domain/failures/proposal_failure.dart';
 import 'package:notes_tasks/modules/propsal/presentation/providers/proposals_stream_providers.dart';
 import 'package:notes_tasks/modules/propsal/presentation/screens/proposal_details_page.dart';
+import 'package:notes_tasks/modules/propsal/presentation/viewmodels/proposal_actions_viewmodel.dart';
 
 class ClientJobProposalsSection extends ConsumerWidget {
   final String jobId;
@@ -25,8 +28,27 @@ class ClientJobProposalsSection extends ConsumerWidget {
     required this.jobId,
   });
 
+  void _openChat(BuildContext context, String chatId) {
+    // ✅ adjust if your route differs
+    context.push('/chat/$chatId');
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // ✅ listen for action errors once (safe to call in build with Riverpod)
+    ref.listen(proposalActionsViewModelProvider, (prev, next) {
+      next.whenOrNull(
+        error: (e, _) {
+          final key =
+              (e is ProposalFailure) ? e.messageKey : 'something_went_wrong';
+          AppSnackbar.show(context, key.tr());
+
+          // clear sticky error
+          ref.read(proposalActionsViewModelProvider.notifier).reset();
+        },
+      );
+    });
+
     final async = ref.watch(jobProposalsStreamProvider(jobId));
 
     return async.when(
@@ -72,6 +94,7 @@ class ClientJobProposalsSection extends ConsumerWidget {
                     ),
                   );
                 },
+                onOpenChat: _openChat,
               ),
             );
           },
@@ -84,10 +107,12 @@ class ClientJobProposalsSection extends ConsumerWidget {
 class _ClientProposalCard extends ConsumerWidget {
   final ProposalEntity proposal;
   final VoidCallback onOpen;
+  final void Function(BuildContext context, String chatId) onOpenChat;
 
   const _ClientProposalCard({
     required this.proposal,
     required this.onOpen,
+    required this.onOpenChat,
   });
 
   String _fmtMoney(double? v) => v == null ? '-' : v.toStringAsFixed(0);
@@ -133,19 +158,15 @@ class _ClientProposalCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ======================
-            // Header row (avatar + name + subtitle)
-            // ======================
             freelancerAsync.when(
               loading: () => _HeaderRow(
                 name: 'loading_freelancer'.tr(),
                 subtitle: '',
                 photoUrl: null,
               ),
-              error: (e, _) => _HeaderRow(
+              error: (_, __) => _HeaderRow(
                 name: 'freelancer_default_name'.tr(),
-                subtitle: 'freelancer_load_failed'
-                    .tr(namedArgs: {'error': e.toString()}),
+                subtitle: 'tap_to_view_proposal_details'.tr(),
                 photoUrl: null,
               ),
               data: (u) {
@@ -159,12 +180,7 @@ class _ClientProposalCard extends ConsumerWidget {
                 );
               },
             ),
-
             SizedBox(height: AppSpacing.spaceSM),
-
-            // ======================
-            // Title row + chevron
-            // ======================
             Row(
               children: [
                 Expanded(
@@ -179,25 +195,14 @@ class _ClientProposalCard extends ConsumerWidget {
                 const Icon(Icons.chevron_right),
               ],
             ),
-
             SizedBox(height: AppSpacing.spaceXS),
-
-            // ======================
-            // Cover letter (خفيف)
-            // ======================
             Text(
               proposal.coverLetter,
-              maxLines: 2, // ✅ أقل ازدحام من 3
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.body,
-              softWrap: true,
             ),
-
             SizedBox(height: AppSpacing.spaceSM),
-
-            // ======================
-            // Status + Price row (بدون Wrap)
-            // ======================
             Row(
               children: [
                 Flexible(
@@ -218,30 +223,63 @@ class _ClientProposalCard extends ConsumerWidget {
                 ],
               ],
             ),
-
-            // ======================
-            // Actions (only if pending)
-            // ======================
             if (canDecide) ...[
               SizedBox(height: AppSpacing.spaceMD),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => vm.reject(context, proposal.id),
-                      icon: const Icon(Icons.close),
-                      label: Text('reject'.tr()),
-                    ),
-                  ),
-                  SizedBox(width: AppSpacing.spaceSM),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () => vm.accept(context, proposal.id),
-                      icon: const Icon(Icons.check),
-                      label: Text('accept'.tr()),
-                    ),
-                  ),
-                ],
+              Consumer(
+                builder: (_, ref, __) {
+                  final loading =
+                      ref.watch(proposalActionsViewModelProvider).isLoading;
+
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: loading
+                              ? null
+                              : () async {
+                                  final ok = await vm.reject(proposal.id);
+                                  if (!context.mounted) return;
+                                  if (ok) {
+                                    AppSnackbar.show(
+                                      context,
+                                      'operation_done'.tr(),
+                                    );
+                                  }
+                                },
+                          icon: const Icon(Icons.close),
+                          label: Text('reject'.tr()),
+                        ),
+                      ),
+                      SizedBox(width: AppSpacing.spaceSM),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: loading
+                              ? null
+                              : () async {
+                                  final chatId = await vm.accept(proposal.id);
+                                  if (!context.mounted) return;
+
+                                  if (chatId != null && chatId.isNotEmpty) {
+                                    AppSnackbar.show(
+                                      context,
+                                      'operation_done'.tr(),
+                                    );
+                                    onOpenChat(context, chatId);
+                                  } else {
+                                    // accept succeeded but chatId missing (rare) -> show generic
+                                    AppSnackbar.show(
+                                      context,
+                                      'operation_done'.tr(),
+                                    );
+                                  }
+                                },
+                          icon: const Icon(Icons.check),
+                          label: Text('accept'.tr()),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
           ],
