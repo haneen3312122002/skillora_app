@@ -1,3 +1,4 @@
+// job_image_helpers.dart
 import 'dart:typed_data';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -18,14 +19,22 @@ Future<void> pickAndUploadJobCover(
   final Uint8List? bytes = await picker.pickFromGallery(imageQuality: 80);
   if (bytes == null) return;
 
-  final ok = await ref
+  final errKey = await ref
       .read(jobCoverImageViewModelProvider(jobId).notifier)
-      .saveCover(context, bytes);
+      .saveCover(bytes);
 
-  if (!ok) {
+  if (!context.mounted) return;
+
+  if (errKey != null) {
     AppSnackbar.show(
       context,
-      'failed_with_error'.tr(namedArgs: {'error': 'job_cover_upload'}),
+      errKey == 'failed_with_error'
+          ? 'failed_with_error'.tr(namedArgs: {'error': 'job_cover_upload'})
+          : errKey.tr(),
     );
+    return;
   }
+
+  // ✅ success feedback (اختياري)
+  AppSnackbar.show(context, 'cover_image_updated'.tr());
 }

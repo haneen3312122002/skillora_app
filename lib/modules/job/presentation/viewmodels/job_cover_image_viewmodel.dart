@@ -1,12 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'package:notes_tasks/core/shared/widgets/common/app_snackbar.dart';
 
 class JobCoverImageViewModel extends StateNotifier<Uint8List?> {
   JobCoverImageViewModel(this._jobId) : super(null) {
@@ -28,21 +25,15 @@ class JobCoverImageViewModel extends StateNotifier<Uint8List?> {
     }
   }
 
-  Future<bool> saveCover(BuildContext context, Uint8List bytes) async {
+  /// ✅ returns null on success, or messageKey on failure
+  Future<String?> saveCover(Uint8List bytes) async {
     try {
       state = bytes;
-
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('$_prefix$_jobId', base64Encode(bytes));
-
-      AppSnackbar.show(context, 'cover_image_updated'.tr());
-      return true;
-    } catch (e) {
-      AppSnackbar.show(
-        context,
-        'failed_with_error'.tr(namedArgs: {'error': e.toString()}),
-      );
-      return false;
+      return null;
+    } catch (_) {
+      return 'cover_image_update_failed';
     }
   }
 

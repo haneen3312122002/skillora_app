@@ -12,7 +12,6 @@ import 'package:notes_tasks/core/shared/widgets/lists/app_grid_view.dart';
 import 'package:notes_tasks/core/shared/widgets/lists/app_list_tile.dart';
 import 'package:notes_tasks/core/shared/widgets/tags/app_tags_wrap.dart';
 import 'package:notes_tasks/core/shared/widgets/texts/expandable_text.dart';
-import 'package:notes_tasks/modules/job/presentation/services/job_cover_picker.dart';
 import 'package:notes_tasks/modules/job/presentation/viewmodels/job_cover_image_viewmodel.dart';
 import 'package:notes_tasks/modules/profile_projects/domain/entities/profile_item.dart';
 
