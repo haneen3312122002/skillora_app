@@ -88,6 +88,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final profileAsync = ref.watch(profileStreamProvider);
 
     return AppScaffold(
+      showSettingsButton: true,
       showLogout: true,
       extendBodyBehindAppBar: false,
       useSafearea: false,

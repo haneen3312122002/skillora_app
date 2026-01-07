@@ -16,6 +16,10 @@ class HomeHeader extends StatelessWidget {
     this.searchController,
     this.searchHint = 'Search',
     this.onNotificationTap,
+
+    // ✅ جديد
+    this.onSettingsTap,
+    this.onLogoutTap,
     this.height,
     this.width,
     this.backgroundColor,
@@ -29,6 +33,10 @@ class HomeHeader extends StatelessWidget {
   final String searchHint;
 
   final VoidCallback? onNotificationTap;
+
+  // ✅ جديد
+  final VoidCallback? onSettingsTap;
+  final VoidCallback? onLogoutTap;
 
   final double? height;
   final double? width;
@@ -56,12 +64,14 @@ class HomeHeader extends StatelessWidget {
             subtitle: subtitle,
             backgroundColor: backgroundColor,
             onNotificationTap: onNotificationTap,
+            onSettingsTap: onSettingsTap,
+            onLogoutTap: onLogoutTap,
           ),
           if (shouldShowSearch)
             Positioned(
               left: 16.w,
               right: 16.w,
-              top: headerHeight - 70.h, // ✅ ديناميكي بدل 250.h
+              top: headerHeight - 70.h,
               child: _SearchBox(
                 controller: searchController!,
                 hint: searchHint,
@@ -81,6 +91,8 @@ class _HeaderBody extends StatelessWidget {
     this.subtitle,
     this.backgroundColor,
     this.onNotificationTap,
+    this.onSettingsTap,
+    this.onLogoutTap,
   });
 
   final double height;
@@ -88,7 +100,10 @@ class _HeaderBody extends StatelessWidget {
   final String title;
   final String? subtitle;
   final Color? backgroundColor;
+
   final VoidCallback? onNotificationTap;
+  final VoidCallback? onSettingsTap;
+  final VoidCallback? onLogoutTap;
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +119,10 @@ class _HeaderBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: 48.h),
+
+          // ======================
+          // Top Row (subtitle + actions)
+          // ======================
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -122,6 +141,54 @@ class _HeaderBody extends StatelessWidget {
                   ),
                 ),
               ),
+
+              // ✅ SETTINGS
+              if (onSettingsTap != null)
+                InkWell(
+                  onTap: onSettingsTap,
+                  borderRadius: BorderRadius.circular(22.r),
+                  child: Container(
+                    height: 44.r,
+                    width: 44.r,
+                    margin: EdgeInsets.only(right: 8.w),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.7),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.settings_outlined,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+
+              // ✅ LOGOUT
+              if (onLogoutTap != null)
+                InkWell(
+                  onTap: onLogoutTap,
+                  borderRadius: BorderRadius.circular(22.r),
+                  child: Container(
+                    height: 44.r,
+                    width: 44.r,
+                    margin: EdgeInsets.only(right: 8.w),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.7),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.logout,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+
+              // 🔔 Notification (اختياري)
               if (onNotificationTap != null)
                 InkWell(
                   onTap: onNotificationTap,
@@ -144,7 +211,12 @@ class _HeaderBody extends StatelessWidget {
                 ),
             ],
           ),
+
           SizedBox(height: 9.h),
+
+          // ======================
+          // Title
+          // ======================
           Padding(
             padding: EdgeInsets.only(left: 16.w, right: 16.w),
             child: LayoutBuilder(

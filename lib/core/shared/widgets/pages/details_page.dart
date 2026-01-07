@@ -1,13 +1,17 @@
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/shared/enums/page_mode.dart';
 import 'package:notes_tasks/core/shared/widgets/buttons/primary_button.dart';
 import 'package:notes_tasks/core/shared/widgets/common/app_scaffold.dart';
 import 'package:notes_tasks/core/shared/widgets/header/app_cover_header.dart';
+
+// ✅ New: use your new details widgets
+import 'package:notes_tasks/core/shared/widgets/details/details_section_title.dart';
+import 'package:notes_tasks/core/shared/widgets/details/details_info_group.dart';
 
 class AppDetailsPage extends StatelessWidget {
   final String? appBarTitleKey;
@@ -54,7 +58,7 @@ class AppDetailsPage extends StatelessWidget {
     this.primaryButtonLabelKey,
     this.primaryButtonIcon,
     this.onPrimaryButtonPressed,
-    this.proposalButtonLabelKey = 'Make Proposal',
+    this.proposalButtonLabelKey = 'make_proposal',
     this.proposalButtonIcon,
     this.onProposalPressed,
     this.sections = const [],
@@ -73,141 +77,161 @@ class AppDetailsPage extends StatelessWidget {
 
     final colors = Theme.of(context).colorScheme;
 
-    final bool showProposalBtn = isView && onProposalPressed != null;
-    final bool showPrimaryBtn =
+    final showProposalBtn = isView && onProposalPressed != null;
+    final showPrimaryBtn =
         primaryButtonLabelKey != null && onPrimaryButtonPressed != null;
-    if (showProposalBtn || showPrimaryBtn) {
-      debugPrint('DetailsPage buttons visible');
-    }
 
     return AppScaffold(
       actions: appBarActions,
       title: appBarTitleKey?.tr(),
-      scrollable: true,
-      usePadding: true,
+      scrollable: false, // ✅ we control scrolling inside
+      usePadding: false, // ✅ custom padding
       showSettingsButton: false,
       showLogout: false,
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ======================
-          // Header
-          // ======================
-          AppCoverHeader(
-            title: title,
-            subtitle: subtitle,
-            coverUrl: coverImageUrl,
-            coverBytes: coverBytes,
-            avatarUrl: avatarImageUrl,
-            avatarBytes: avatarBytes,
-            showAvatar: showAvatar,
-            isCoverLoading: isCoverLoading,
-            isAvatarLoading: isAvatarLoading,
-            onChangeCover: isEdit ? onChangeCover : null,
-            onChangeAvatar: isEdit ? onChangeAvatar : null,
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.only(
+                left: AppSpacing.spaceMD,
+                right: AppSpacing.spaceMD,
+                top: AppSpacing.spaceMD,
+                bottom: AppSpacing.spaceLG,
+              ),
+              children: [
+                // ======================
+                // Header
+                // ======================
+                AppCoverHeader(
+                  title: title,
+                  subtitle: subtitle,
+                  coverUrl: coverImageUrl,
+                  coverBytes: coverBytes,
+                  avatarUrl: avatarImageUrl,
+                  avatarBytes: avatarBytes,
+                  showAvatar: showAvatar,
+                  isCoverLoading: isCoverLoading,
+                  isAvatarLoading: isAvatarLoading,
+                  onChangeCover: isEdit ? onChangeCover : null,
+                  onChangeAvatar: isEdit ? onChangeAvatar : null,
+                ),
+
+                SizedBox(height: AppSpacing.spaceLG),
+
+                // ======================
+                // Sections as Cards
+                // ======================
+                if (sections.isNotEmpty)
+                  ..._buildSectionCards(
+                    context,
+                    sections,
+                    surface: colors.surface,
+                    outline: colors.outlineVariant.withOpacity(0.6),
+                  ),
+              ],
+            ),
           ),
 
-          SizedBox(height: AppSpacing.spaceLG),
-
           // ======================
-          // Buttons under header
+          // Bottom action bar (always visible)
           // ======================
           if (showProposalBtn || showPrimaryBtn)
-            Padding(
-              padding: EdgeInsets.only(bottom: AppSpacing.spaceLG),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (showProposalBtn)
-                    AppPrimaryButton(
-                      variant: AppButtonVariant.outlined, // ✅ مفرّغ
-                      label: proposalButtonLabelKey.tr(),
-                      icon: proposalButtonIcon ?? Icons.send_outlined,
-                      onPressed: onProposalPressed!,
+            SafeArea(
+              top: false,
+              child: Container(
+                padding: EdgeInsets.all(AppSpacing.spaceMD),
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  border: Border(
+                    top: BorderSide(
+                      color: colors.outlineVariant.withOpacity(0.7),
                     ),
-                  if (showProposalBtn && showPrimaryBtn)
-                    SizedBox(height: AppSpacing.spaceSM),
-                  if (showPrimaryBtn)
-                    AppPrimaryButton(
-                      variant: AppButtonVariant.primary, // ✅ ملوّن
-                      label: primaryButtonLabelKey!.tr(),
-                      icon: primaryButtonIcon ?? Icons.check,
-                      onPressed: onPrimaryButtonPressed!,
-                    ),
-                ],
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (showProposalBtn)
+                      AppPrimaryButton(
+                        variant: AppButtonVariant.outlined,
+                        label: proposalButtonLabelKey.tr(),
+                        icon: proposalButtonIcon ?? Icons.send_outlined,
+                        onPressed: onProposalPressed!,
+                      ),
+                    if (showProposalBtn && showPrimaryBtn)
+                      SizedBox(height: AppSpacing.spaceSM),
+                    if (showPrimaryBtn)
+                      AppPrimaryButton(
+                        variant: AppButtonVariant.primary,
+                        label: primaryButtonLabelKey!.tr(),
+                        icon: primaryButtonIcon ?? Icons.check,
+                        onPressed: onPrimaryButtonPressed!,
+                      ),
+                  ],
+                ),
               ),
             ),
-
-          // ======================
-          // Sections
-          // ======================
-          if (sections.isNotEmpty)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: _asProfessionalBlocks(
-                context,
-                sections,
-                accent: colors.primary,
-              ),
-            ),
-
-          SizedBox(height: AppSpacing.spaceLG),
         ],
       ),
     );
   }
 
-  // Skip spacing-only widgets
-  bool _isLayoutSpacer(Widget w) {
-    if (w is SizedBox) {
-      return w.child == null;
-    }
-    return w is Divider;
-  }
-
-  // Professional blocks with left accent line
-  List<Widget> _asProfessionalBlocks(
+  List<Widget> _buildSectionCards(
     BuildContext context,
     List<Widget> children, {
-    required Color accent,
+    required Color surface,
+    required Color outline,
   }) {
     final filtered = children.where((w) => !_isLayoutSpacer(w)).toList();
     if (filtered.isEmpty) return [];
 
-    final out = <Widget>[];
-
-    for (var i = 0; i < filtered.length; i++) {
-      out.add(
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                width: AppSpacing.r(4),
-                decoration: BoxDecoration(
-                  color: accent.withOpacity(0.85),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(AppSpacing.r(14)),
-                    bottomLeft: Radius.circular(AppSpacing.r(14)),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.all(AppSpacing.spaceMD),
-                  child: filtered[i],
-                ),
-              ),
-            ],
-          ),
+    return List.generate(filtered.length, (i) {
+      return Padding(
+        padding: EdgeInsets.only(bottom: AppSpacing.spaceMD),
+        child: _DetailsCard(
+          surface: surface,
+          outline: outline,
+          child: filtered[i],
         ),
       );
+    });
+  }
 
-      if (i != filtered.length - 1) {
-        out.add(SizedBox(height: AppSpacing.spaceMD));
-      }
-    }
+  bool _isLayoutSpacer(Widget w) {
+    if (w is SizedBox) return w.child == null;
+    return w is Divider;
+  }
+}
 
-    return out;
+class _DetailsCard extends StatelessWidget {
+  final Widget child;
+  final Color surface;
+  final Color outline;
+
+  const _DetailsCard({
+    required this.child,
+    required this.surface,
+    required this.outline,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: BorderRadius.circular(AppSpacing.r(16)),
+        border: Border.all(color: outline),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 18,
+            spreadRadius: 0,
+            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(0.06),
+          ),
+        ],
+      ),
+      padding: EdgeInsets.all(AppSpacing.spaceMD),
+      child: child,
+    );
   }
 }

@@ -7,6 +7,11 @@ import 'package:notes_tasks/core/app/routes/app_routes.dart';
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/app/theme/text_styles.dart';
 import 'package:notes_tasks/core/shared/enums/page_mode.dart';
+import 'package:notes_tasks/core/shared/widgets/details/details_info_group.dart';
+import 'package:notes_tasks/core/shared/widgets/details/details_info_item.dart';
+import 'package:notes_tasks/core/shared/widgets/details/details_section_title.dart';
+import 'package:notes_tasks/core/shared/widgets/details/details_tags_block.dart';
+import 'package:notes_tasks/core/shared/widgets/details/details_text_block.dart';
 import 'package:notes_tasks/core/shared/widgets/pages/app_bottom_sheet.dart';
 import 'package:notes_tasks/core/shared/widgets/pages/details_page.dart';
 import 'package:notes_tasks/core/shared/widgets/tags/app_tags_wrap.dart';
@@ -160,79 +165,77 @@ class JobDetailsPage extends ConsumerWidget {
               : null,
 
           sections: [
-            // ✅ Client controls
+            // ✅ Client controls (خليها زي ما هي بس داخل Card)
             if (_isClient) ...[
-              Row(
+              DetailsSectionTitle('actions'.tr()),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: isToggling
-                          ? null
-                          : () => jobVm.setOpen(job, !job.isOpen), // ✅
-                      icon: isToggling
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Icon(
-                              job.isOpen
-                                  ? Icons.lock_outline
-                                  : Icons.lock_open_outlined,
-                            ),
-                      label:
-                          Text(job.isOpen ? 'close_job'.tr() : 'open_job'.tr()),
-                    ),
+                  ElevatedButton.icon(
+                    onPressed: isToggling
+                        ? null
+                        : () => jobVm.setOpen(job, !job.isOpen),
+                    icon: isToggling
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Icon(job.isOpen
+                            ? Icons.lock_outline
+                            : Icons.lock_open_outlined),
+                    label:
+                        Text(job.isOpen ? 'close_job'.tr() : 'open_job'.tr()),
+                  ),
+                  SizedBox(height: AppSpacing.spaceSM),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      context.push(
+                        AppRoutes.clientProposals,
+                        extra: ClientProposalsArgs(jobId: job.id),
+                      );
+                    },
+                    icon: const Icon(Icons.list_alt),
+                    label: Text('view_proposals'.tr()),
                   ),
                 ],
               ),
-              SizedBox(height: AppSpacing.spaceMD),
-              ElevatedButton.icon(
-                onPressed: () {
-                  context.push(
-                    AppRoutes.clientProposals,
-                    extra: ClientProposalsArgs(jobId: job.id),
-                  );
-                },
-                icon: const Icon(Icons.list_alt),
-                label: Text('view_proposals'.tr()),
-              ),
-              SizedBox(height: AppSpacing.spaceLG),
             ],
 
-            if (hasCategory)
-              _infoBlock(title: 'category'.tr(), value: job.category),
-            _infoBlock(
-              title: 'status'.tr(),
-              value: job.isOpen ? 'open'.tr() : 'closed'.tr(),
+            // ✅ Info card
+            DetailsSectionTitle('job_info'.tr()),
+            DetailsInfoGroup(
+              children: [
+                if (hasCategory)
+                  DetailsInfoItem(title: 'category'.tr(), value: job.category),
+                DetailsInfoItem(
+                  title: 'status'.tr(),
+                  value: job.isOpen ? 'open'.tr() : 'closed'.tr(),
+                ),
+                if (hasBudget)
+                  DetailsInfoItem(
+                    title: 'budget'.tr(),
+                    value: job.budget!.toStringAsFixed(0),
+                  ),
+                DetailsInfoItem(
+                    title: 'deadline'.tr(), value: _fmtDate(job.deadline)),
+                if (hasJobUrl)
+                  DetailsInfoItem(
+                      title: 'job_url'.tr(), value: job.jobUrl!.trim()),
+              ],
             ),
-            if (hasBudget)
-              _infoBlock(
-                title: 'budget'.tr(),
-                value: job.budget!.toStringAsFixed(0),
-              ),
-            _infoBlock(title: 'deadline'.tr(), value: _fmtDate(job.deadline)),
-            if (hasJobUrl)
-              _infoBlock(title: 'job_url'.tr(), value: job.jobUrl!.trim()),
 
-            if (hasDesc) ...[
-              Text(
-                'job_description_title'.tr(),
-                style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+            if (hasDesc)
+              DetailsTextBlock(
+                title: 'job_description_title'.tr(),
+                text: job.description,
               ),
-              SizedBox(height: AppSpacing.spaceSM),
-              Text(job.description, style: AppTextStyles.body),
-            ],
 
-            if (hasSkills) ...[
-              SizedBox(height: AppSpacing.spaceLG),
-              Text(
-                'job_skills_label'.tr(),
-                style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+            if (hasSkills)
+              DetailsTagsBlock(
+                title: 'job_skills_label'.tr(),
+                tags: job.skills,
               ),
-              SizedBox(height: AppSpacing.spaceSM),
-              AppTagsWrap(tags: job.skills),
-            ],
           ],
         );
       },

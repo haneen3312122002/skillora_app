@@ -7,6 +7,11 @@ import 'package:notes_tasks/core/app/theme/text_styles.dart';
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/shared/enums/page_mode.dart';
 import 'package:notes_tasks/core/shared/widgets/common/app_snackbar.dart';
+import 'package:notes_tasks/core/shared/widgets/details/details_async_block.dart';
+import 'package:notes_tasks/core/shared/widgets/details/details_info_group.dart';
+import 'package:notes_tasks/core/shared/widgets/details/details_info_item.dart';
+import 'package:notes_tasks/core/shared/widgets/details/details_section_title.dart';
+import 'package:notes_tasks/core/shared/widgets/details/details_text_block.dart';
 import 'package:notes_tasks/core/shared/widgets/pages/details_page.dart';
 
 import 'package:notes_tasks/modules/job/presentation/providers/jobs_byid_stream_providers.dart';
@@ -177,59 +182,72 @@ class _ProposalDetailsBody extends ConsumerWidget {
       avatarImageUrl: clientPhotoUrl,
       avatarBytes: null,
       sections: [
-        Text('job'.tr(),
-            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700)),
-        SizedBox(height: AppSpacing.spaceSM),
-        jobAsync.when(
-          loading: () => Text('loading'.tr()),
-          error: (_, __) => Text('something_went_wrong'.tr()),
-          data: (_) => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _infoBlock(title: 'label_title'.tr(), value: jobTitle),
-              _infoBlock(title: 'label_category'.tr(), value: jobCategory),
-              _infoBlock(
-                  title: 'label_budget'.tr(), value: _fmtMoney(jobBudget)),
-              _infoBlock(
-                  title: 'label_deadline'.tr(), value: _fmtDate(jobDeadline)),
-            ],
-          ),
+        DetailsSectionTitle('job'.tr()),
+        DetailsAsyncBlock(
+          async: jobAsync,
+          loadingText: 'loading'.tr(),
+          errorPrefix: 'something_went_wrong'.tr(),
+          builder: (jobData) {
+            final job = jobData as dynamic;
+            final jobTitle = job?.title?.toString() ?? '-';
+            final jobCategory = job?.category?.toString() ?? '-';
+            final jobBudget = job?.budget as double?;
+            final jobDeadline = job?.deadline as DateTime?;
+
+            return DetailsInfoGroup(
+              children: [
+                DetailsInfoItem(title: 'label_title'.tr(), value: jobTitle),
+                DetailsInfoItem(
+                    title: 'label_category'.tr(), value: jobCategory),
+                DetailsInfoItem(
+                  title: 'label_budget'.tr(),
+                  value: _fmtMoney(jobBudget),
+                ),
+                DetailsInfoItem(
+                  title: 'label_deadline'.tr(),
+                  value: _fmtDate(jobDeadline),
+                ),
+              ],
+            );
+          },
         ),
-        SizedBox(height: AppSpacing.spaceLG),
-        Text('client'.tr(),
-            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700)),
-        SizedBox(height: AppSpacing.spaceSM),
-        clientAsync.when(
-          loading: () => Text('loading'.tr()),
-          error: (_, __) => Text('something_went_wrong'.tr()),
-          data: (_) => _infoBlock(title: 'name'.tr(), value: clientName),
+        DetailsSectionTitle('client'.tr()),
+        DetailsAsyncBlock(
+          async: clientAsync,
+          loadingText: 'loading'.tr(),
+          errorPrefix: 'something_went_wrong'.tr(),
+          builder: (clientData) {
+            final clientMap = clientData as Map<String, dynamic>?;
+            final clientName = (clientMap?['name'] ?? '-') as String;
+            return DetailsInfoGroup(
+              children: [
+                DetailsInfoItem(title: 'name'.tr(), value: clientName),
+              ],
+            );
+          },
         ),
-        SizedBox(height: AppSpacing.spaceLG),
-        Text('proposal'.tr(),
-            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w700)),
-        SizedBox(height: AppSpacing.spaceSM),
-        _infoBlock(title: 'label_status'.tr(), value: statusText),
-        if (proposal.price != null)
-          _infoBlock(
-              title: 'label_price'.tr(), value: _fmtMoney(proposal.price)),
-        if (proposal.durationDays != null)
-          _infoBlock(
-            title: 'label_duration'.tr(),
-            value: '${proposal.durationDays} ${'days'.tr()}',
-          ),
-        SizedBox(height: AppSpacing.spaceSM),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        DetailsSectionTitle('proposal'.tr()),
+        DetailsInfoGroup(
           children: [
-            Text('proposal_message'.tr(),
-                style:
-                    AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)),
-            SizedBox(height: AppSpacing.spaceSM),
-            Text(proposal.coverLetter, style: AppTextStyles.body),
+            DetailsInfoItem(title: 'label_status'.tr(), value: statusText),
+            if (proposal.price != null)
+              DetailsInfoItem(
+                title: 'label_price'.tr(),
+                value: _fmtMoney(proposal.price),
+              ),
+            if (proposal.durationDays != null)
+              DetailsInfoItem(
+                title: 'label_duration'.tr(),
+                value: '${proposal.durationDays} ${'days'.tr()}',
+              ),
           ],
         ),
+        DetailsTextBlock(
+          title: 'proposal_message'.tr(),
+          text: proposal.coverLetter,
+        ),
         if (showClientDecisionButtons) ...[
-          SizedBox(height: AppSpacing.spaceLG),
+          DetailsSectionTitle('actions'.tr()),
           Row(
             children: [
               Expanded(
@@ -239,9 +257,8 @@ class _ProposalDetailsBody extends ConsumerWidget {
                       : () async {
                           final ok = await vm.reject(proposal.id);
                           if (!context.mounted) return;
-                          if (ok) {
+                          if (ok)
                             AppSnackbar.show(context, 'operation_done'.tr());
-                          }
                         },
                   child: Text('reject'.tr()),
                 ),
@@ -255,11 +272,9 @@ class _ProposalDetailsBody extends ConsumerWidget {
                           final chatId = await vm.accept(proposal.id);
                           if (!context.mounted) return;
 
+                          AppSnackbar.show(context, 'operation_done'.tr());
                           if (chatId != null && chatId.isNotEmpty) {
-                            AppSnackbar.show(context, 'operation_done'.tr());
                             onOpenChat(context, chatId);
-                          } else {
-                            AppSnackbar.show(context, 'operation_done'.tr());
                           }
                         },
                   child: Text('accept'.tr()),

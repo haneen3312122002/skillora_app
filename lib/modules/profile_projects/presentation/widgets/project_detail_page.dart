@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/app/theme/text_styles.dart';
 import 'package:notes_tasks/core/shared/enums/page_mode.dart';
+import 'package:notes_tasks/core/shared/widgets/details/details_tags_block.dart';
+import 'package:notes_tasks/core/shared/widgets/details/details_text_block.dart';
 
 import 'package:notes_tasks/core/shared/widgets/pages/details_page.dart';
 import 'package:notes_tasks/core/shared/widgets/tags/app_tags_wrap.dart';
@@ -68,37 +70,14 @@ class ProjectDetailsPage extends ConsumerWidget {
       onChangeAvatar: null,
       sections: [
         if (hasDescription)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'project_description_title'.tr(),
-                style: AppTextStyles.body.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              SizedBox(height: AppSpacing.spaceSM),
-              Text(
-                project.description,
-                style: AppTextStyles.body,
-              ),
-            ],
+          DetailsTextBlock(
+            title: 'project_description_title'.tr(),
+            text: project.description,
           ),
         if (hasTools)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'project_tools_label'.tr(),
-                style: AppTextStyles.body.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              SizedBox(height: AppSpacing.spaceSM),
-              AppTagsWrap(
-                tags: project.tools,
-              ),
-            ],
+          DetailsTagsBlock(
+            title: 'project_tools_label'.tr(),
+            tags: project.tools,
           ),
       ],
     );
