@@ -57,4 +57,7 @@ class AppRoutes {
   // ===========================================================
   static const String adminHome = '/admin/home';
   static const String adminDashboard = '/admin/dashboard';
+  // داخل AppRoutes
+  static const String adminUserProfile = '/admin/user';
+  static String adminUserProfilePath(String id) => '$adminUserProfile/$id';
 }

@@ -45,13 +45,13 @@ import 'package:notes_tasks/modules/settings/presentation/screens/change_passwor
 import 'package:notes_tasks/modules/settings/presentation/screens/settings_screen.dart';
 
 // Users
-import 'package:notes_tasks/modules/users/presentation/features/user_details/screens/user_section_details_view.dart';
-import 'package:notes_tasks/modules/users/presentation/features/user_details/user_section_details_args.dart';
 
 /// ✅ IMPORTANT:
 /// Keys must be top-level so they are created once only.
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
+final GlobalKey<NavigatorState> _adminShellNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'adminShell');
 
 final GlobalKey<NavigatorState> _clientShellNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'clientShell');
@@ -148,17 +148,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               proposalId: args.proposalId, mode: args.mode);
         },
       ),
-      GoRoute(
-        path: AppRoutes.userSectionDetails,
-        builder: (_, state) {
-          final args = state.extra as UserSectionDetailsArgs;
-          return UserSectionDetailsView(
-            title: args.title,
-            provider: args.provider,
-            mapper: args.mapper,
-          );
-        },
-      ),
 
       // Chat details
       GoRoute(
@@ -167,6 +156,31 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           final chatId = state.pathParameters['id']!;
           return ChatDetailsScreen(chatId: chatId);
         },
+      ),
+// ===========================================================
+// ADMIN SHELL
+// ===========================================================
+      ShellRoute(
+        navigatorKey: _adminShellNavigatorKey,
+        builder: (_, __, child) =>
+            AdminShell(child: child), // لازم يكون عندك AdminShell
+        routes: [
+          // GoRoute(
+          //   path: '${AppRoutes.adminUserProfile}/:id',
+          //   builder: (context, state) {
+          //     final userId = state.pathParameters['id']!;
+          //     return AdminUserProfileScreen(userId: userId);
+          //   },
+          // ),
+          GoRoute(
+            path: AppRoutes.adminHome,
+            builder: (_, __) => const HomePage(),
+          ),
+          GoRoute(
+            path: AppRoutes.adminDashboard,
+            builder: (_, __) => const HomePage(), // أو صفحة داشبورد مستقلة
+          ),
+        ],
       ),
 
       // ===========================================================

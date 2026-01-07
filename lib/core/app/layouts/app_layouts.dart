@@ -79,3 +79,35 @@ class FreelancerShell extends StatelessWidget {
     );
   }
 }
+
+class AdminShell extends StatelessWidget {
+  final Widget child;
+  const AdminShell({super.key, required this.child});
+
+  static const List<NavItemConfig> navItems = [
+    NavItemConfig(
+      route: AppRoutes.adminHome,
+      icon: Icons.home_outlined,
+      label: 'Home',
+    ),
+    NavItemConfig(
+      route: AppRoutes.adminDashboard,
+      icon: Icons.dashboard_outlined,
+      label: 'Dashboard',
+    ),
+    // لو حابة مستقبلاً:
+    // NavItemConfig(
+    //   route: AppRoutes.adminUsers,
+    //   icon: Icons.people_outline,
+    //   label: 'Users',
+    // ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return AppNavBarContainer(
+      items: navItems,
+      child: child,
+    );
+  }
+}

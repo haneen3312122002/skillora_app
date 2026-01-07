@@ -271,7 +271,7 @@ class _ProfileItemTile<T extends ProfileItem> extends ConsumerWidget {
               : null,
         ),
         if (extraInfo != null) ...[
-          SizedBox(height: AppSpacing.y(4)),
+          //  SizedBox(height: AppSpacing.y(4)),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: AppSpacing.x(8)),
             child: extraInfo!,
@@ -281,7 +281,7 @@ class _ProfileItemTile<T extends ProfileItem> extends ConsumerWidget {
           SizedBox(height: AppSpacing.y(4)),
           Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.x(8),
+              horizontal: AppSpacing.x(4),
               vertical: AppSpacing.y(4),
             ),
             child: ExpandableText(
@@ -294,13 +294,6 @@ class _ProfileItemTile<T extends ProfileItem> extends ConsumerWidget {
               ),
               textAlign: TextAlign.start,
             ),
-          ),
-        ],
-        if (hasTags) ...[
-          SizedBox(height: AppSpacing.y(8)),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.x(8)),
-            child: AppTagsWrap(tags: item.tags),
           ),
         ],
       ],

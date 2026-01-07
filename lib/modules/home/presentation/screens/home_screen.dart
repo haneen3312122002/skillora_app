@@ -18,6 +18,7 @@ import 'package:notes_tasks/modules/profile/presentation/providers/profile/get_p
 
 import 'package:notes_tasks/modules/home/presentation/viewmodels/home_bootstrap_viewmodel.dart';
 import 'package:notes_tasks/modules/propsal/presentation/screens/proposal_details_page.dart';
+import 'package:notes_tasks/modules/users/presentation/screens/users_admin_screen.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -87,6 +88,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final profileAsync = ref.watch(profileStreamProvider);
 
     return AppScaffold(
+      showLogout: true,
       extendBodyBehindAppBar: false,
       useSafearea: false,
       body: profileAsync.when(
@@ -122,11 +124,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                 subtitle: subtitle,
                 showSearch: false,
                 searchController: null,
-                padChild: true,
-                child: Text(
-                  'profile_admin_ok'.tr(),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+                padChild: false, // ✅ غالبًا أفضل
+                child: const UsersAdminScreen(),
               );
 
             case UserRole.freelancer:
