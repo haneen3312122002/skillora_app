@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
+import 'package:notes_tasks/modules/auth/presentation/account_switcher/account_switcher_sheet.dart';
 import 'package:notes_tasks/modules/home/presentation/widgets/home_header.dart';
 
 class HomeShell extends StatelessWidget {
@@ -37,6 +38,14 @@ class HomeShell extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         HomeHeader(
+          onLogoutTap: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              showDragHandle: true,
+              builder: (_) => const AccountSwitcherSheet(),
+            );
+          },
           title: title,
           subtitle: subtitle,
           showSearch: showSearch,

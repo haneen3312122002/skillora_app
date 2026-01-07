@@ -10,14 +10,12 @@ import 'package:notes_tasks/core/shared/widgets/fields/custom_text_field.dart';
 class HomeHeader extends StatelessWidget {
   const HomeHeader({
     super.key,
-    this.title = 'Let’s find best talent for you',
+    required this.title,
     this.subtitle,
     this.showSearch = false,
     this.searchController,
     this.searchHint = 'Search',
     this.onNotificationTap,
-
-    // ✅ جديد
     this.onSettingsTap,
     this.onLogoutTap,
     this.height,
@@ -33,14 +31,11 @@ class HomeHeader extends StatelessWidget {
   final String searchHint;
 
   final VoidCallback? onNotificationTap;
-
-  // ✅ جديد
   final VoidCallback? onSettingsTap;
   final VoidCallback? onLogoutTap;
 
   final double? height;
   final double? width;
-
   final Color? backgroundColor;
 
   @override
@@ -48,8 +43,8 @@ class HomeHeader extends StatelessWidget {
     final headerHeight = height ?? AppSpacing.homeContainerH;
     final headerWidth = width ?? double.infinity;
 
-    final shouldShowSearch = showSearch && searchController != null;
-    final totalHeight = shouldShowSearch ? headerHeight + 50.h : headerHeight;
+    final showSearchBox = showSearch && searchController != null;
+    final totalHeight = showSearchBox ? headerHeight + 50.h : headerHeight;
 
     return SizedBox(
       height: totalHeight,
@@ -67,7 +62,9 @@ class HomeHeader extends StatelessWidget {
             onSettingsTap: onSettingsTap,
             onLogoutTap: onLogoutTap,
           ),
-          if (shouldShowSearch)
+
+          // 🔍 Search box
+          if (showSearchBox)
             Positioned(
               left: 16.w,
               right: 16.w,
@@ -82,6 +79,10 @@ class HomeHeader extends StatelessWidget {
     );
   }
 }
+
+// ===================================================================
+// Header Body
+// ===================================================================
 
 class _HeaderBody extends StatelessWidget {
   const _HeaderBody({
@@ -107,6 +108,8 @@ class _HeaderBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasSubtitle = (subtitle ?? '').trim().isNotEmpty;
+
     return Container(
       height: height,
       width: width,
@@ -120,111 +123,69 @@ class _HeaderBody extends StatelessWidget {
         children: [
           SizedBox(height: 48.h),
 
-          // ======================
-          // Top Row (subtitle + actions)
-          // ======================
+          // =================================================
+          // Top row (subtitle + buttons)
+          // =================================================
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 30.h),
-                  child: Text(
-                    subtitle ?? '',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.body.copyWith(
-                      color: Colors.white.withOpacity(0.85),
-                      fontWeight: FontWeight.w400,
-                      fontSize: 18.sp,
-                    ),
-                  ),
-                ),
+                child: hasSubtitle
+                    ? Padding(
+                        padding: EdgeInsets.only(
+                          left: 16.w,
+                          right: 16.w,
+                          top: 30.h,
+                        ),
+                        child: Text(
+                          subtitle!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.body.copyWith(
+                            color: Colors.white.withOpacity(0.85),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 18.sp,
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
               ),
 
-              // ✅ SETTINGS
+              // ⚙️ Settings
               if (onSettingsTap != null)
-                InkWell(
-                  onTap: onSettingsTap,
-                  borderRadius: BorderRadius.circular(22.r),
-                  child: Container(
-                    height: 44.r,
-                    width: 44.r,
-                    margin: EdgeInsets.only(right: 8.w),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.7),
-                        width: 1.2,
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.settings_outlined,
-                      color: Colors.white,
-                    ),
-                  ),
+                _HeaderIcon(
+                  icon: Icons.settings_outlined,
+                  onTap: onSettingsTap!,
                 ),
 
-              // ✅ LOGOUT
+              // 🚪 Logout
               if (onLogoutTap != null)
-                InkWell(
-                  onTap: onLogoutTap,
-                  borderRadius: BorderRadius.circular(22.r),
-                  child: Container(
-                    height: 44.r,
-                    width: 44.r,
-                    margin: EdgeInsets.only(right: 8.w),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.7),
-                        width: 1.2,
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.logout,
-                      color: Colors.white,
-                    ),
-                  ),
+                _HeaderIcon(
+                  icon: Icons.logout,
+                  onTap: onLogoutTap!,
                 ),
 
-              // 🔔 Notification (اختياري)
+              // 🔔 Notification
               if (onNotificationTap != null)
-                InkWell(
-                  onTap: onNotificationTap,
-                  borderRadius: BorderRadius.circular(22.r),
-                  child: Container(
-                    height: 44.r,
-                    width: 44.r,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.7),
-                        width: 1.2,
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.notifications_none_rounded,
-                      color: Colors.white,
-                    ),
-                  ),
+                _HeaderIcon(
+                  icon: Icons.notifications_none_rounded,
+                  onTap: onNotificationTap!,
                 ),
             ],
           ),
 
-          SizedBox(height: 9.h),
+          SizedBox(height: 12.h),
 
-          // ======================
+          // =================================================
           // Title
-          // ======================
+          // =================================================
           Padding(
-            padding: EdgeInsets.only(left: 16.w, right: 16.w),
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: LayoutBuilder(
               builder: (context, constraints) {
                 return Text(
                   title,
                   maxLines: 2,
-                  softWrap: true,
                   overflow: TextOverflow.visible,
                   style: AppTextStyles.title.copyWith(
                     color: Colors.white,
@@ -241,6 +202,48 @@ class _HeaderBody extends StatelessWidget {
     );
   }
 }
+
+// ===================================================================
+// Header Icon Button
+// ===================================================================
+
+class _HeaderIcon extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _HeaderIcon({
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(22.r),
+      child: Container(
+        height: 44.r,
+        width: 44.r,
+        margin: EdgeInsets.only(right: 8.w),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Colors.white.withOpacity(0.7),
+            width: 1.2,
+          ),
+        ),
+        child: Icon(
+          icon,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+}
+
+// ===================================================================
+// Search Box
+// ===================================================================
 
 class _SearchBox extends StatelessWidget {
   const _SearchBox({
