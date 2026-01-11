@@ -80,7 +80,11 @@ class JobDetailsPage extends ConsumerWidget {
     // ✅ listen once per build lifecycle (Riverpod handles it safely)
     ref.listen(jobActionsViewModelProvider, (prev, next) {
       // error
-      next.whenOrNull(
+      next.when(
+        loading: () {
+          
+        },
+        
         error: (e, _) {
           final key = (e is JobFailure) ? e.messageKey : 'something_went_wrong';
           AppSnackbar.show(context, key.tr());

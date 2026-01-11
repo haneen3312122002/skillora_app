@@ -2,10 +2,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:notes_tasks/core/session/providers/current_user_provider.dart';
 
 import 'package:notes_tasks/core/app/theme/text_styles.dart';
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/shared/enums/page_mode.dart';
+import 'package:notes_tasks/core/shared/enums/role.dart';
 import 'package:notes_tasks/core/shared/widgets/common/app_snackbar.dart';
 import 'package:notes_tasks/core/shared/widgets/details/details_async_block.dart';
 import 'package:notes_tasks/core/shared/widgets/details/details_info_group.dart';
@@ -81,9 +83,10 @@ class ProposalDetailsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // ✅ listen for action errors
     ref.listen(proposalActionsViewModelProvider, (prev, next) {
-      next.whenOrNull(
+      next.when(
+        loading: () {},
+        data: (data) {},
         error: (e, _) {
           final key =
               (e is ProposalFailure) ? e.messageKey : 'something_went_wrong';
@@ -94,7 +97,13 @@ class ProposalDetailsPage extends ConsumerWidget {
     });
 
     final proposalAsync = ref.watch(proposalByIdStreamProvider(proposalId));
-    final profileAsync = ref.watch(profileStreamProvider);
+
+    // ✅ هذا المهم: بروفايل المستخدم الحالي
+    final myUid = ref.watch(currentUserIdProvider);
+    if (myUid == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    final profileAsync = ref.watch(profileStreamProvider(myUid));
 
     return proposalAsync.when(
       loading: () =>
@@ -115,7 +124,7 @@ class ProposalDetailsPage extends ConsumerWidget {
           error: (e, _) => Scaffold(body: Center(child: Text('Error: $e'))),
           data: (profile) {
             final role = profile?.role ?? '';
-            final isClient = role == 'client';
+            final isClient = profile?.role == UserRole.client;
 
             return _ProposalDetailsBody(
               proposal: proposal,

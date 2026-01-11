@@ -10,8 +10,9 @@ final jobsFeedStreamProvider = StreamProvider<List<JobEntity>>((ref) {
 });
 
 // ✅ My jobs
-final myJobsStreamProvider = StreamProvider<List<JobEntity>>((ref) {
-  return ref.watch(watchMyJobsUseCaseProvider)();
+final myJobsStreamProvider =
+    StreamProvider.family<List<JobEntity>, String>((ref, uid) {
+  return ref.watch(watchMyJobsUseCaseProvider)(uid);
 });
 
 // ✅ Job by id (خليه من service مباشر عادي)

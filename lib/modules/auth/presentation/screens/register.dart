@@ -42,7 +42,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.initState();
 
     _registerSub = ref.listenManual(registerViewModelProvider, (prev, next) {
-      next.whenOrNull(
+      next.when(
         data: (_) {
           if (!mounted) return;
 

@@ -11,6 +11,7 @@ class ProfileSkillsSection extends StatefulWidget {
   final String titleKey;
   final List<String> skills;
 
+  final bool canEdit; // ✅ جديد
   final bool isEditing;
   final bool isSaving;
 
@@ -25,6 +26,7 @@ class ProfileSkillsSection extends StatefulWidget {
     super.key,
     this.titleKey = 'skills_title',
     required this.skills,
+    required this.canEdit, // ✅
     required this.isEditing,
     required this.isSaving,
     required this.onEdit,
@@ -57,6 +59,9 @@ class _ProfileSkillsSectionState extends State<ProfileSkillsSection> {
   }
 
   List<Widget> _buildActions() {
+    // ✅ زائر: لا actions
+    if (!widget.canEdit) return [];
+
     if (!widget.isEditing) {
       return [
         AppIconButton(

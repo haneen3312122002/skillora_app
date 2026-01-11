@@ -5,5 +5,7 @@ class WatchMyJobsUseCase {
   final JobsService _service;
   WatchMyJobsUseCase(this._service);
 
-  Stream<List<JobEntity>> call() => _service.watchMyJobs();
+  Stream<List<JobEntity>> call(String uid) {
+    return _service.watchMyJobs(uid);
+  }
 }

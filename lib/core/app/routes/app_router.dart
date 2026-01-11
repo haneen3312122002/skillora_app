@@ -162,23 +162,22 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 // ===========================================================
       ShellRoute(
         navigatorKey: _adminShellNavigatorKey,
-        builder: (_, __, child) =>
-            AdminShell(child: child), // لازم يكون عندك AdminShell
+        builder: (_, __, child) => AdminShell(child: child),
         routes: [
-          // GoRoute(
-          //   path: '${AppRoutes.adminUserProfile}/:id',
-          //   builder: (context, state) {
-          //     final userId = state.pathParameters['id']!;
-          //     return AdminUserProfileScreen(userId: userId);
-          //   },
-          // ),
+          GoRoute(
+            path: '${AppRoutes.adminUserProfile}/:id',
+            builder: (context, state) {
+              final userId = state.pathParameters['id']!;
+              return ProfileScreen(viewedUid: userId); // ✅ نمرر uid
+            },
+          ),
           GoRoute(
             path: AppRoutes.adminHome,
             builder: (_, __) => const HomePage(),
           ),
           GoRoute(
             path: AppRoutes.adminDashboard,
-            builder: (_, __) => const HomePage(), // أو صفحة داشبورد مستقلة
+            builder: (_, __) => const HomePage(),
           ),
         ],
       ),

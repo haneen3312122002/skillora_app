@@ -50,7 +50,7 @@ class _ChatDetailsScreenState extends ConsumerState<ChatDetailsScreen> {
 
     // ✅ listen only for errors (snackbar)
     _chatSub = ref.listenManual(chatActionsViewModelProvider, (prev, next) {
-      next.whenOrNull(
+      next.when(
         error: (e, _) {
           if (!mounted) return;
           final key =

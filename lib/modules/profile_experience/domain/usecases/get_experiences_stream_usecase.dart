@@ -14,8 +14,10 @@ class GetExperiencesStreamUseCase {
   final ProfileService _service;
   GetExperiencesStreamUseCase(this._service);
 
-  Stream<List<ExperienceEntity>> call() {
-    return _service.watchExperiencesMaps().map((items) {
+  Stream<List<ExperienceEntity>> call(String uid) {
+    // ✅
+    return _service.watchExperiencesMaps(uid).map((items) {
+      // ✅
       return items.map(ExperienceModel.fromMap).toList();
     });
   }

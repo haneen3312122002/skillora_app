@@ -36,7 +36,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     // ✅ Side-effects only (snackbar + navigation)
     _loginSub = ref.listenManual(firebaseLoginVMProvider, (prev, next) {
-      next.whenOrNull(
+      next.when(
         data: (_) {
           if (!mounted) return;
 

@@ -22,7 +22,7 @@ class ProfileItemsSection<T extends ProfileItem> extends ConsumerWidget {
   final List<T> items;
   final String titleKey;
   final String emptyHintKey;
-  final VoidCallback onAdd;
+  final VoidCallback? onAdd;
   final void Function(BuildContext context, T item) onTap;
   final Future<void> Function(WidgetRef ref, T item)? onEdit;
   final Future<void> Function(WidgetRef ref, T item)? onDelete;

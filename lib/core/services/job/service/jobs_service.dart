@@ -127,12 +127,11 @@ class JobsService {
         .map((snap) => snap.docs.map(JobModel.fromDoc).toList());
   }
 
-  Stream<List<JobEntity>> watchMyJobs() {
-    final user = currentUser;
-    if (user == null) return const Stream.empty();
+  Stream<List<JobEntity>> watchMyJobs(String uid) {
+    if (uid.trim().isEmpty) return const Stream.empty();
 
     return _jobsCol
-        .where('clientId', isEqualTo: user.uid)
+        .where('clientId', isEqualTo: uid) // ✅ بدل current user
         .snapshots()
         .map((snap) => snap.docs.map(JobModel.fromDoc).toList());
   }

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:notes_tasks/core/services/profile/services/profile_api.dart';
 import 'package:notes_tasks/core/services/profile/services/profile_experiences_services.dart';
 import 'package:notes_tasks/core/services/profile/services/profile_projects_services.dart';
@@ -42,28 +43,44 @@ class ProfileService
     return _userDoc(uid).collection('projects');
   }
 
-  Stream<List<Map<String, dynamic>>> watchExperiencesMaps() {
-    final user = _currentUser;
-    if (user == null) return const Stream.empty();
+  DateTime? _toDate(dynamic v) {
+    if (v is Timestamp) return v.toDate();
+    return null;
+  }
 
-    return _experiencesCol(user.uid)
+  // =============================
+  // PROFILE (Api)
+  // =============================
+
+  @override
+  Stream<DocumentSnapshot<Map<String, dynamic>>> watchProfile(String uid) {
+    final cleaned = uid.trim();
+    if (cleaned.isEmpty) return const Stream.empty();
+
+    // ✅ FIX: must be a full doc ref: users/{uid}
+    return _userDoc(cleaned).snapshots();
+  }
+
+  // =============================
+  // EXPERIENCES (Maps stream)
+  // =============================
+
+  Stream<List<Map<String, dynamic>>> watchExperiencesMaps(String uid) {
+    final cleaned = uid.trim();
+    if (cleaned.isEmpty) return const Stream.empty();
+
+    return _experiencesCol(cleaned)
         .orderBy('startDate', descending: true)
         .snapshots()
         .map((snap) {
       return snap.docs.map((doc) {
         final data = doc.data();
-
-        DateTime? toDate(dynamic v) {
-          if (v is Timestamp) return v.toDate();
-          return null;
-        }
-
         return <String, dynamic>{
           'id': doc.id,
           'title': (data['title'] as String?) ?? '',
           'company': (data['company'] as String?) ?? '',
-          'startDate': toDate(data['startDate']),
-          'endDate': toDate(data['endDate']),
+          'startDate': _toDate(data['startDate']),
+          'endDate': _toDate(data['endDate']),
           'location': (data['location'] as String?) ?? '',
           'description': (data['description'] as String?) ?? '',
         };
@@ -71,19 +88,18 @@ class ProfileService
     });
   }
 
-  Stream<List<Map<String, dynamic>>> watchProjectsMaps() {
-    final user = _currentUser;
-    if (user == null) return const Stream.empty();
+  // =============================
+  // PROJECTS (Maps stream)
+  // =============================
 
-    return _projectsCol(user.uid)
+  Stream<List<Map<String, dynamic>>> watchProjectsMaps(String uid) {
+    final cleaned = uid.trim();
+    if (cleaned.isEmpty) return const Stream.empty();
+
+    return _projectsCol(cleaned)
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snap) {
-      DateTime? toDate(dynamic v) {
-        if (v is Timestamp) return v.toDate();
-        return null;
-      }
-
       return snap.docs.map((doc) {
         final data = doc.data();
         return <String, dynamic>{
@@ -95,8 +111,8 @@ class ProfileService
               .toList(),
           'imageUrl': data['imageUrl'] as String?,
           'projectUrl': data['projectUrl'] as String?,
-          'createdAt': toDate(data['createdAt']),
-          'updatedAt': toDate(data['updatedAt']),
+          'createdAt': _toDate(data['createdAt']),
+          'updatedAt': _toDate(data['updatedAt']),
         };
       }).toList();
     });
@@ -109,15 +125,8 @@ class ProfileService
   }
 
   // =============================
-  // PROFILE (Api)
+  // PROFILE UPDATE
   // =============================
-
-  @override
-  Stream<DocumentSnapshot<Map<String, dynamic>>> watchProfile() {
-    final user = _currentUser;
-    if (user == null) return const Stream.empty();
-    return _userDoc(user.uid).snapshots();
-  }
 
   @override
   Future<void> updateName(String name) async {
@@ -152,7 +161,7 @@ class ProfileService
   }
 
   // =============================
-  // PROFILE IMAGES (Api)
+  // PROFILE IMAGES
   // =============================
 
   @override
@@ -185,7 +194,7 @@ class ProfileService
   }
 
   // =============================
-  // SKILLS (Api)
+  // SKILLS
   // =============================
 
   @override
@@ -226,7 +235,7 @@ class ProfileService
   }
 
   // =============================
-  // EXPERIENCES (Api)
+  // EXPERIENCES (CRUD)
   // =============================
 
   @override
@@ -298,10 +307,9 @@ class ProfileService
   }
 
   // =============================
-  // PROJECTS (Api)
+  // PROJECTS (CRUD)
   // =============================
 
-  @override
   @override
   Future<String> addProject({
     required String title,
@@ -367,7 +375,7 @@ class ProfileService
   }
 
   // =============================
-  // Optional: legacy getter (keep if used elsewhere)
+  // Optional legacy getter
   // =============================
 
   Future<Map<String, dynamic>?> getProfile() async {

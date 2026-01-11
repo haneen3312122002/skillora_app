@@ -38,7 +38,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
 
     // ✅ Side-effect: navigate when verified
     _verifiedSub = ref.listenManual(emailVerifiedVMProvider, (prev, next) {
-      next.whenOrNull(
+      next.when(
         data: (isVerified) {
           if (!isVerified) return;
           if (!mounted) return;

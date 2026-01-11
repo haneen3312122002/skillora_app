@@ -2,6 +2,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:notes_tasks/core/app/routes/app_routes.dart';
 
 import 'package:notes_tasks/core/shared/enums/role.dart';
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
@@ -181,7 +183,10 @@ class UsersAdminScreen extends ConsumerWidget {
                           const PopupMenuDivider(),
                         ],
                       ),
-                      onTap: () {},
+                      onTap: () {
+                        debugPrint('.................' + user.id + user.email);
+                        context.push(AppRoutes.adminUserProfilePath(user.id));
+                      },
                     );
                   },
                 );

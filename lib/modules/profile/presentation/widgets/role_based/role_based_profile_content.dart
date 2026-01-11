@@ -7,6 +7,7 @@ import 'package:notes_tasks/core/shared/enums/role.dart';
 import 'package:notes_tasks/core/shared/widgets/common/empty_view.dart';
 import 'package:notes_tasks/core/shared/widgets/common/error_view.dart';
 import 'package:notes_tasks/core/shared/widgets/common/loading_indicator.dart';
+
 import 'package:notes_tasks/modules/profile/presentation/providers/profile/get_profile_stream_provider.dart';
 
 import 'package:notes_tasks/modules/profile/presentation/widgets/header/profile_header.dart';
@@ -21,7 +22,13 @@ class RoleBasedProfileContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profileAsync = ref.watch(profileStreamProvider);
+    final uid = ref.watch(effectiveProfileUidProvider);
+
+    if (uid == null) {
+      return EmptyView(message: 'no_profile_data'.tr());
+    }
+
+    final profileAsync = ref.watch(profileStreamProvider(uid));
 
     return profileAsync.when(
       data: (profile) {
@@ -47,20 +54,19 @@ class RoleBasedProfileContent extends ConsumerWidget {
       loading: () => const LoadingIndicator(withBackground: false),
       error: (e, st) => ErrorView(
         message: e.toString(),
-        onRetry: () => ref.refresh(profileStreamProvider),
+        onRetry: () => ref.refresh(profileStreamProvider(uid)),
       ),
     );
   }
 }
 
 class _RoleSections extends StatelessWidget {
-  final dynamic profile; // ProfileEntity
-
+  final dynamic profile;
   const _RoleSections({required this.profile});
 
   @override
   Widget build(BuildContext context) {
-    final role = profile.role as UserRole;
+    final role = profile.role;
 
     switch (role) {
       case UserRole.client:

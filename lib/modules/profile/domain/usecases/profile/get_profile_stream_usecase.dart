@@ -15,8 +15,8 @@ class GetProfileStreamUseCase {
 
   GetProfileStreamUseCase(this._service);
 
-  Stream<ProfileEntity?> call() {
-    return _service.watchProfile().map((doc) {
+  Stream<ProfileEntity?> call(String uid) {
+    return _service.watchProfile(uid).map((doc) {
       if (!doc.exists) return null;
       return ProfileModel.fromDoc(doc);
     });

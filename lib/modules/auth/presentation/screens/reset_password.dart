@@ -46,7 +46,10 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   Widget build(BuildContext context) {
     // ✅ UI reacts (no manual subscription)
     ref.listen<AsyncValue<void>>(resetPasswordViewModelProvider, (prev, next) {
-      next.whenOrNull(
+      next.when(
+        loading: () {
+          
+        },
         data: (_) {
           if (!mounted) return;
           // ✅ generic + safe

@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class ProfileApi {
-  Stream<DocumentSnapshot<Map<String, dynamic>>> watchProfile();
+  Stream<DocumentSnapshot<Map<String, dynamic>>> watchProfile(String uid);
 
   Future<void> updateName(String name);
   Future<void> updateEmail(String email);

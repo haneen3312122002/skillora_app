@@ -28,7 +28,13 @@ class NotificationsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // ✅ UI side-effects only
     ref.listen(notificationsActionsViewModelProvider, (prev, next) {
-      next.whenOrNull(
+      next.when(
+        loading: () {
+          
+        },
+        data: (data) {
+          
+        },
         error: (e, _) {
           final key = (e is NotificationsFailure)
               ? e.messageKey

@@ -7,6 +7,8 @@ import 'package:notes_tasks/modules/profile/domain/entities/profile_entity.dart'
 
 import 'package:notes_tasks/modules/job/presentation/providers/jobs_stream_providers.dart';
 
+import 'package:notes_tasks/modules/profile/presentation/providers/profile/get_profile_stream_provider.dart';
+
 import 'package:notes_tasks/modules/profile_experience/presentation/providers/experiences_stream_provider.dart';
 import 'package:notes_tasks/modules/profile_experience/presentation/widgets/profile_experience_section.dart';
 import 'package:notes_tasks/modules/profile_experience/presentation/widgets/experience_form_widget.dart';
@@ -21,8 +23,16 @@ class ClientProfileSections extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final myJobsAsync = ref.watch(myJobsStreamProvider);
-    final experiencesAsync = ref.watch(experiencesStreamProvider);
+    final uid = ref.watch(effectiveProfileUidProvider);
+    final canEdit = ref.watch(canEditProfileProvider);
+
+    if (uid == null) {
+      return const SizedBox.shrink();
+    }
+
+    // ✅ UID-based streams
+    final myJobsAsync = ref.watch(myJobsStreamProvider(uid));
+    final experiencesAsync = ref.watch(experiencesStreamProvider(uid));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -50,20 +60,24 @@ class ClientProfileSections extends ConsumerWidget {
         experiencesAsync.when(
           data: (exps) => ProfileExperienceSection(
             experiences: exps,
-            onAddExperience: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                builder: (_) => const ExperienceFormWidget(),
-              );
-            },
-            onEditExperience: (exp) {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                builder: (_) => ExperienceFormWidget(initial: exp),
-              );
-            },
+            onAddExperience: canEdit
+                ? () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (_) => const ExperienceFormWidget(),
+                    );
+                  }
+                : null,
+            onEditExperience: canEdit
+                ? (exp) {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (_) => ExperienceFormWidget(initial: exp),
+                    );
+                  }
+                : null,
           ),
           loading: () => const Padding(
             padding: EdgeInsets.all(16),

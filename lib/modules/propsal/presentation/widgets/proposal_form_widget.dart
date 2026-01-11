@@ -79,7 +79,13 @@ class _ProposalFormWidgetState extends ConsumerState<ProposalFormWidget> {
   Widget build(BuildContext context) {
     // ✅ snackbar on errors (UI-side)
     ref.listen(proposalFormViewModelProvider, (prev, next) {
-      next.whenOrNull(
+      next.when(
+        loading: () {
+          
+        },
+        data: (data) {
+          
+        },
         error: (e, _) {
           final key =
               (e is ProposalFailure) ? e.messageKey : 'something_went_wrong';

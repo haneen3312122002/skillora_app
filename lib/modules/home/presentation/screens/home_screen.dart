@@ -12,6 +12,8 @@ import 'package:notes_tasks/core/shared/widgets/common/empty_view.dart';
 import 'package:notes_tasks/core/shared/widgets/common/error_view.dart';
 import 'package:notes_tasks/core/shared/widgets/common/loading_indicator.dart';
 
+import 'package:notes_tasks/core/session/providers/current_user_provider.dart';
+
 import 'package:notes_tasks/modules/home/presentation/widgets/freelancer_home.dart';
 import 'package:notes_tasks/modules/home/presentation/widgets/homeshell.dart';
 import 'package:notes_tasks/modules/profile/presentation/providers/profile/get_profile_stream_provider.dart';
@@ -30,39 +32,14 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   late final TextEditingController _search;
 
-  late final ProviderSubscription _profileSub;
-
   @override
   void initState() {
     super.initState();
     _search = TextEditingController();
-
-    // ✅ Move side-effects out of build
-    _profileSub = ref.listenManual(profileStreamProvider, (prev, next) {
-      next.whenOrNull(
-        data: (profile) {
-          final vm = ref.read(homeBootstrapViewModelProvider.notifier);
-
-          // ✅ logout/guest
-          if (profile == null) {
-            vm.reset();
-            return;
-          }
-
-          // ✅ run bootstrap once per session/user (handled in VM)
-          vm.bootstrap(
-            profile: profile,
-            onChat: _goToChat,
-            onProposal: _goToProposal,
-          );
-        },
-      );
-    });
   }
 
   @override
   void dispose() {
-    _profileSub.close();
     _search.dispose();
     super.dispose();
   }
@@ -85,7 +62,35 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final profileAsync = ref.watch(profileStreamProvider);
+    final myUid = ref.watch(currentUserIdProvider);
+
+    // ✅ Listen for bootstrap (based on my uid)
+    if (myUid != null) {
+      ref.listen(profileStreamProvider(myUid), (prev, next) {
+        next.when(
+          data: (profile) {
+            final vm = ref.read(homeBootstrapViewModelProvider.notifier);
+
+            if (profile == null) {
+              vm.reset();
+              return;
+            }
+
+            vm.bootstrap(
+              profile: profile,
+              onChat: _goToChat,
+              onProposal: _goToProposal,
+            );
+          },
+          loading: () {},
+          error: (_, __) {},
+        );
+      });
+    }
+
+    final profileAsync = myUid == null
+        ? const AsyncValue.data(null)
+        : ref.watch(profileStreamProvider(myUid));
 
     return AppScaffold(
       showSettingsButton: true,
@@ -94,7 +99,6 @@ class _HomePageState extends ConsumerState<HomePage> {
       useSafearea: false,
       body: profileAsync.when(
         data: (profile) {
-          // ✅ Rendering only (no ref.read side effects here)
           if (profile == null) {
             return Padding(
               padding: EdgeInsets.all(AppSpacing.spaceMD),
@@ -125,7 +129,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 subtitle: subtitle,
                 showSearch: false,
                 searchController: null,
-                padChild: false, // ✅ غالبًا أفضل
+                padChild: false,
                 child: const UsersAdminScreen(),
               );
 
@@ -158,7 +162,10 @@ class _HomePageState extends ConsumerState<HomePage> {
           child: ErrorView(
             message: 'something_went_wrong'.tr(),
             fullScreen: false,
-            onRetry: () => ref.refresh(profileStreamProvider),
+            onRetry: () {
+              final uid = ref.read(currentUserIdProvider);
+              if (uid != null) ref.refresh(profileStreamProvider(uid));
+            },
           ),
         ),
       ),

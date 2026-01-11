@@ -37,7 +37,13 @@ class ClientJobProposalsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // ✅ listen for action errors once (safe to call in build with Riverpod)
     ref.listen(proposalActionsViewModelProvider, (prev, next) {
-      next.whenOrNull(
+      next.when(
+        data: (data) {
+          
+        },
+        loading: () {
+          
+        },
         error: (e, _) {
           final key =
               (e is ProposalFailure) ? e.messageKey : 'something_went_wrong';

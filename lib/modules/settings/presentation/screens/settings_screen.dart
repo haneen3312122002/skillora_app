@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:notes_tasks/core/session/providers/current_user_provider.dart';
 
 import 'package:notes_tasks/core/shared/constants/spacing.dart';
 import 'package:notes_tasks/core/app/viewmodels/theme_viewmodel.dart';
@@ -12,7 +13,6 @@ import 'package:notes_tasks/core/shared/widgets/common/loading_indicator.dart';
 
 import 'package:notes_tasks/modules/profile/domain/entities/profile_entity.dart';
 import 'package:notes_tasks/modules/profile/presentation/providers/profile/get_profile_stream_provider.dart';
-import 'package:notes_tasks/modules/profile/presentation/services/profile_actions_helpers.dart';
 import 'package:notes_tasks/modules/settings/presentation/services/settings_actions_service.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -20,13 +20,17 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profileAsync = ref.watch(profileStreamProvider);
+    final myUid = ref.watch(currentUserIdProvider);
+
+    final profileAsync = myUid == null
+        ? const AsyncValue<ProfileEntity?>.data(null)
+        : ref.watch(profileStreamProvider(myUid));
 
     return profileAsync.when(
       data: (profile) => AppScaffold(
         title: 'settings_title'.tr(),
         body: _SettingsContent(profile: profile),
-        showSettingsButton: false, // ما بدنا زر Settings داخل صفحة Settings 🙂
+        showSettingsButton: false,
         actions: const [],
       ),
       loading: () => const AppScaffold(

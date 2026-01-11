@@ -33,7 +33,12 @@ class ProfileJobsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // ✅ UI handles side-effects
     ref.listen(jobActionsViewModelProvider, (prev, next) {
-      next.whenOrNull(
+      next.when(
+        loading: () {
+          
+        },
+      
+
         error: (e, _) {
           final key = (e is JobFailure) ? e.messageKey : 'something_went_wrong';
           AppSnackbar.show(context, key.tr());

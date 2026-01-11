@@ -14,8 +14,10 @@ class GetProjectsStreamUseCase {
   final ProfileService _service;
   GetProjectsStreamUseCase(this._service);
 
-  Stream<List<ProjectEntity>> call() {
-    return _service.watchProjectsMaps().map((items) {
+  Stream<List<ProjectEntity>> call(String uid) {
+    // ✅
+    return _service.watchProjectsMaps(uid).map((items) {
+      // ✅
       return items.map(ProjectModel.fromMap).toList();
     });
   }
