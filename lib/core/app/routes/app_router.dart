@@ -43,6 +43,7 @@ import 'package:notes_tasks/modules/propsal/presentation/screens/proposal_detail
 // Settings
 import 'package:notes_tasks/modules/settings/presentation/screens/change_password_screen.dart';
 import 'package:notes_tasks/modules/settings/presentation/screens/settings_screen.dart';
+import 'package:notes_tasks/modules/users/presentation/screens/user_public_profile_screen.dart';
 
 // Users
 
@@ -70,6 +71,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // ===========================================================
       // CORE / LOADING
       // ===========================================================
+      GoRoute(
+        path: '${AppRoutes.publicUserProfile}/:id',
+        builder: (context, state) {
+          final userId = state.pathParameters['id']!;
+          return UserPublicProfileScreen(uid: userId);
+        },
+      ),
+
       GoRoute(
         path: AppRoutes.loading,
         builder: (_, __) => const LoadingIndicator(withBackground: true),

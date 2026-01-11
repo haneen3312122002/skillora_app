@@ -4,6 +4,8 @@ import 'package:notes_tasks/core/shared/enums/role.dart';
 
 //redirect helpers
 bool isLoadingRoute(String loc) => loc == AppRoutes.loading;
+bool isPublicUserProfileRoute(String loc) =>
+    loc.startsWith('${AppRoutes.publicUserProfile}/');
 
 bool isResetPasswordRoute(String loc) => loc == AppRoutes.resetPassword;
 
@@ -38,8 +40,10 @@ bool isProposalDetailsRoute(String loc) => loc == AppRoutes.proposalDetails;
 
 /// Pages that can be opened outside the shell (no bottom nav).
 /// Usually details pages or settings pages that should not force a home redirect.
+///
 bool allowOutsideShell(String loc) {
   return isSharedDetailsRoute(loc) ||
+      isPublicUserProfileRoute(loc) || // ✅ جديد
       isSettingsRoute(loc) ||
       isResetPasswordRoute(loc) ||
       isChangePasswordRoute(loc) ||

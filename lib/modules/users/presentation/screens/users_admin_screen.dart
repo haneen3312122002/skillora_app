@@ -1,4 +1,5 @@
 // lib/modules/users/presentation/screens/users_admin_screen.dart
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,8 +16,10 @@ import 'package:notes_tasks/core/shared/widgets/common/loading_indicator.dart';
 import 'package:notes_tasks/core/shared/widgets/lists/app_infinite_list.dart';
 import 'package:notes_tasks/core/shared/widgets/lists/app_list_tile.dart';
 
-// ✅ تأكدي إن هذا هو الملف اللي فيه ProfileSectionCard عندك
 import 'package:notes_tasks/core/shared/widgets/cards/app_section_card.dart';
+
+// ✅ NEW: local image bytes (avatarFor)
+import 'package:notes_tasks/core/shared/providers/local_image_storage_provider.dart';
 
 import '../viewmodels/users_admin_viewmodel.dart';
 
@@ -108,84 +111,115 @@ class UsersAdminScreen extends ConsumerWidget {
                   onLoadMore: () {},
                   onRefresh: vm.refresh,
                   itemBuilder: (context, user, index) {
-                    return AppListTile(
-                      title: user.name.isEmpty ? '(No name)' : user.name,
-                      subtitle:
-                          '${user.email}\nrole: ${user.role.name} • disabled: ${user.isDisabled}',
-                      trailing: PopupMenuButton<String>(
-                        icon: const Icon(Icons.more_vert_rounded),
-                        onSelected: (v) async {
-                          switch (v) {
-                            case 'role_admin':
-                              await _runAction(
-                                context,
-                                ref,
-                                () => vm.changeRole(
-                                  userId: user.id,
-                                  role: UserRole.admin,
-                                ),
-                                successMsg: 'role_updated'.tr(),
-                              );
-                              break;
-
-                            case 'role_client':
-                              await _runAction(
-                                context,
-                                ref,
-                                () => vm.changeRole(
-                                  userId: user.id,
-                                  role: UserRole.client,
-                                ),
-                                successMsg: 'role_updated'.tr(),
-                              );
-                              break;
-
-                            case 'role_freelancer':
-                              await _runAction(
-                                context,
-                                ref,
-                                () => vm.changeRole(
-                                  userId: user.id,
-                                  role: UserRole.freelancer,
-                                ),
-                                successMsg: 'role_updated'.tr(),
-                              );
-                              break;
-
-                            case 'toggle_disabled':
-                              await _runAction(
-                                context,
-                                ref,
-                                () => vm.toggleDisabled(
-                                  userId: user.id,
-                                  isDisabled: !user.isDisabled,
-                                ),
-                                successMsg: (!user.isDisabled)
-                                    ? 'user_disabled'.tr()
-                                    : 'user_enabled'.tr(),
-                              );
-                              break;
-                          }
-                        },
-                        itemBuilder: (_) => [
-                          const PopupMenuItem(
-                            value: 'role_admin',
-                            child: Text('Set role: Admin'),
+                    return Consumer(
+                      builder: (context, ref, _) {
+                        // ✅ get avatar bytes from provider (NOT photoUrl)
+                        final avatarBytes = ref.watch(
+                          localImageStorageProvider.select(
+                            (s) => s.avatarFor(user.id),
                           ),
-                          const PopupMenuItem(
-                            value: 'role_client',
-                            child: Text('Set role: Client'),
+                        );
+
+                        final displayName =
+                            user.name.isEmpty ? '(No name)' : user.name;
+
+                        return AppListTile(
+                          leading: CircleAvatar(
+                            radius: 18,
+                            backgroundImage: avatarBytes != null
+                                ? MemoryImage(avatarBytes)
+                                : null,
+                            child: avatarBytes == null
+                                ? Text(
+                                    user.name.isNotEmpty
+                                        ? user.name[0].toUpperCase()
+                                        : '?',
+                                  )
+                                : null,
                           ),
-                          const PopupMenuItem(
-                            value: 'role_freelancer',
-                            child: Text('Set role: Freelancer'),
+                          title: displayName,
+                          subtitle:
+                              '${user.email}\nrole: ${user.role.name} • disabled: ${user.isDisabled}',
+                          trailing: PopupMenuButton<String>(
+                            icon: const Icon(Icons.more_vert_rounded),
+                            onSelected: (v) async {
+                              switch (v) {
+                                case 'role_admin':
+                                  await _runAction(
+                                    context,
+                                    ref,
+                                    () => vm.changeRole(
+                                      userId: user.id,
+                                      role: UserRole.admin,
+                                    ),
+                                    successMsg: 'role_updated'.tr(),
+                                  );
+                                  break;
+
+                                case 'role_client':
+                                  await _runAction(
+                                    context,
+                                    ref,
+                                    () => vm.changeRole(
+                                      userId: user.id,
+                                      role: UserRole.client,
+                                    ),
+                                    successMsg: 'role_updated'.tr(),
+                                  );
+                                  break;
+
+                                case 'role_freelancer':
+                                  await _runAction(
+                                    context,
+                                    ref,
+                                    () => vm.changeRole(
+                                      userId: user.id,
+                                      role: UserRole.freelancer,
+                                    ),
+                                    successMsg: 'role_updated'.tr(),
+                                  );
+                                  break;
+
+                                case 'toggle_disabled':
+                                  await _runAction(
+                                    context,
+                                    ref,
+                                    () => vm.toggleDisabled(
+                                      userId: user.id,
+                                      isDisabled: !user.isDisabled,
+                                    ),
+                                    successMsg: (!user.isDisabled)
+                                        ? 'user_disabled'.tr()
+                                        : 'user_enabled'.tr(),
+                                  );
+                                  break;
+                              }
+                            },
+                            itemBuilder: (_) => [
+                              const PopupMenuItem(
+                                value: 'role_admin',
+                                child: Text('Set role: Admin'),
+                              ),
+                              const PopupMenuItem(
+                                value: 'role_client',
+                                child: Text('Set role: Client'),
+                              ),
+                              const PopupMenuItem(
+                                value: 'role_freelancer',
+                                child: Text('Set role: Freelancer'),
+                              ),
+                              const PopupMenuDivider(),
+                            ],
                           ),
-                          const PopupMenuDivider(),
-                        ],
-                      ),
-                      onTap: () {
-                        debugPrint('.................' + user.id + user.email);
-                        context.push(AppRoutes.adminUserProfilePath(user.id));
+                          onTap: () {
+                            debugPrint(
+                              '.................${user.id}${user.email}',
+                            );
+                            context.push(
+                              AppRoutes.publicUserProfilePath(user.id),
+                            );
+                          },
+                        );
                       },
                     );
                   },
@@ -219,7 +253,9 @@ class _RoleFilterDropdown extends StatelessWidget {
           DropdownMenuItem(value: UserRole.admin, child: Text('Admin')),
           DropdownMenuItem(value: UserRole.client, child: Text('Client')),
           DropdownMenuItem(
-              value: UserRole.freelancer, child: Text('Freelancer')),
+            value: UserRole.freelancer,
+            child: Text('Freelancer'),
+          ),
         ],
         onChanged: onChanged,
       ),

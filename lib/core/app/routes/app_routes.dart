@@ -60,4 +60,9 @@ class AppRoutes {
   // داخل AppRoutes
   static const String adminUserProfile = '/admin/user';
   static String adminUserProfilePath(String id) => '$adminUserProfile/$id';
+  // ===========================================================
+// 3) SHARED / DETAILS ROUTES
+// ===========================================================
+  static const String publicUserProfile = '/u';
+  static String publicUserProfilePath(String id) => '$publicUserProfile/$id';
 }
