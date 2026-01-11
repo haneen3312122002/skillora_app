@@ -29,7 +29,10 @@ class PublicClientSections extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         myJobsAsync.when(
-          data: (jobs) => ProfileJobsSection(jobs: jobs),
+          data: (jobs) => ProfileJobsSection(
+            jobs: jobs,
+            isPublic: true,
+          ),
           loading: () => const Padding(
             padding: EdgeInsets.all(16),
             child: Center(child: CircularProgressIndicator()),

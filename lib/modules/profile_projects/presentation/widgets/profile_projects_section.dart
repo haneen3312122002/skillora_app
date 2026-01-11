@@ -15,7 +15,6 @@ import 'package:notes_tasks/modules/profile_projects/presentation/widgets/projec
 class ProfileProjectsSection extends ConsumerWidget {
   final List<ProjectEntity> projects;
   final bool canEdit; // ✅ جديد
-
   const ProfileProjectsSection({
     super.key,
     required this.projects,

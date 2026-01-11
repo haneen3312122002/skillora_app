@@ -85,11 +85,11 @@ class ProfileItemsSection<T extends ProfileItem> extends ConsumerWidget {
     return ProfileSectionCard(
       titleKey: titleKey,
       useCard: false,
-      actions: canEdit
+      actions: (canEdit && onAdd != null)
           ? [
               AppIconButton(
                 onTap: onAdd,
-                icon: hasItems ? Icons.add : Icons.add_circle_outline,
+                icon: hasItems ? Icons.add : Icons.add,
               ),
             ]
           : const [],

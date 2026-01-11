@@ -14,11 +14,9 @@ import 'package:notes_tasks/modules/job/presentation/providers/job_usecases_prov
 
 class ProfileJobsSection extends ConsumerWidget {
   final List<JobEntity> jobs;
-
-  const ProfileJobsSection({
-    super.key,
-    required this.jobs,
-  });
+  final bool isPublic;
+  const ProfileJobsSection(
+      {super.key, required this.jobs, this.isPublic = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,32 +24,39 @@ class ProfileJobsSection extends ConsumerWidget {
       items: jobs,
       titleKey: 'jobs_title',
       emptyHintKey: 'jobs_empty_hint',
-      onAdd: () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (_) => const AppBottomSheet(child: JobFormWidget()),
-        );
-      },
+      onAdd: !isPublic
+          ? () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => const AppBottomSheet(child: JobFormWidget()),
+              );
+            }
+          : null,
       onTap: (context, job) {
         context.push(
           AppRoutes.jobDetails,
           extra: JobDetailsArgs(jobId: job.id, mode: PageMode.edit),
         );
       },
-      onEdit: (ref, job) async {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (_) => AppBottomSheet(child: JobFormWidget(initial: job)),
-        );
-      },
-      onDelete: (ref, job) async {
-        final deleteUseCase = ref.read(deleteJobUseCaseProvider);
-        await deleteUseCase(job.id);
-      },
+      onEdit: !isPublic
+          ? (ref, job) async {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) =>
+                    AppBottomSheet(child: JobFormWidget(initial: job)),
+              );
+            }
+          : null,
+      onDelete: isPublic
+          ? (ref, job) async {
+              final deleteUseCase = ref.read(deleteJobUseCaseProvider);
+              await deleteUseCase(job.id);
+            }
+          : null,
     );
   }
 }
