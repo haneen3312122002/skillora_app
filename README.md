@@ -1,16 +1,94 @@
-# notes_tasks
+# Skillora – Freelance Marketplace Mobile App
 
-A new Flutter project.
+Skillora is a role-based freelance marketplace mobile application built with **Flutter**, developed as part of a professional internship project.  
+The app connects **Clients** and **Freelancers** through a structured and secure workflow, focusing on scalability, clean architecture, and secure session handling.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## ✨ Features
 
-A few resources to get you started if this is your first Flutter project:
+### 👩‍💻 Freelancer
+- Browse and filter available jobs by category
+- Submit proposals to jobs
+- Access **job-scoped private chat** after proposal acceptance
+- Manage professional profile (bio, skills, projects)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### 🧑‍💼 Client
+- Post and manage jobs
+- Review submitted proposals
+- Accept or reject proposals
+- Automatically open private chat after acceptance
+- View freelancer public profiles
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### 🛡 Admin
+- Manage users and roles
+- Enable / disable user accounts
+- Monitor general platform activity
+
+---
+
+## 🏗 Architecture
+
+The project follows **Clean Architecture** with feature-based modularization:
+
+**Presentation Layer**
+- UI, Screens, Widgets, ViewModels
+- Riverpod for state & streams
+- No direct data source access
+
+**Domain Layer**
+- Business logic
+- Entities, Use Cases, Failures
+- Independent from Flutter & Firebase
+
+**Data / Service Layer**
+- Firebase (Auth, Firestore, Storage, FCM)
+- Models & mappers
+
+**Flow**
+
+---
+
+## 🔐 Security Highlights
+
+- Role-Based Access Control (RBAC)
+- Secure route protection per role
+- Job-scoped chat isolation
+- Full session reset on logout
+- Protection against role UI leakage after account switching
+
+---
+
+## 🧪 Testing
+
+- Manual functional testing for all core flows
+- Security testing for session handling & role isolation
+- Tested on real Firebase backend in Debug & Release modes
+
+---
+
+## 🛠 Tech Stack
+
+- **Flutter & Dart**
+- **Riverpod (State Management)**
+- **Clean Architecture & MVVM**
+- **Firebase (Auth, Firestore, Storage, FCM)**
+- **GoRouter**
+- Secure Coding Practices (OWASP awareness)
+
+---
+
+## 📌 Project Status
+
+This project was developed during a professional **Flutter Internship** as a hands-on, production-style application.  
+It reflects my growth in mobile development, architecture design, and secure coding practices.
+
+---
+
+## 👤 Author
+
+**Haneen Ahmad Khanfar**  
+Flutter Developer | Cybersecurity Background  
+📍 Jordan  
+
+🔗 GitHub: https://github.com/haneen3312122002
