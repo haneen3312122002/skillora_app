@@ -1,6 +1,6 @@
 # Skillora – Freelance Marketplace Mobile App
 
-Skillora is a role-based freelance marketplace mobile application built with **Flutter**, developed as part of a professional internship project.  
+Skillora is a role-based freelance marketplace mobile application built with **Flutter**, built as a production-style portfolio project.  
 The app connects **Clients** and **Freelancers** through a structured and secure workflow, focusing on scalability, clean architecture, and secure session handling.
 
 ---
@@ -84,7 +84,7 @@ The project follows **Clean Architecture** with feature-based modularization:
 
 ## 📌 Project Status
 
-This project was developed during a professional **Flutter Internship** as a hands-on, production-style application.  
+A production-style Flutter application built to practice Clean Architecture, RBAC and secure session handling.  
 It reflects my growth in mobile development, architecture design, and secure coding practices.
 
 ---
